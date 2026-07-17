@@ -83,6 +83,7 @@ class KGPipeline:
             chunks=self.chunks,
             hops=self.config.KG_HOPS,
             min_seed_length=self.config.KG_MIN_SEED_LENGTH,
+            max_fanout=self.config.KG_MAX_FANOUT,
         )
         logger.info("Knowledge graph index ready.")
 
