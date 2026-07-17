@@ -49,10 +49,46 @@ What's missing / at risk right now:
 
 *This is the step that turns "I built a knowledge graph" into "I proved whether it helps."*
 
-- [ ] Run `KGPipeline.evaluate()` on the **same test subset size and same `RANDOM_SEED`** as whatever Baseline/Advanced/Agentic were evaluated on (check `results_agentic.json` and `src/results/pipeline_results.csv` for the size actually used previously — the README mentions both `EVAL_SUBSET_SIZE=150` defaults and 1000-query ablation runs, so pin down which one is the real comparison baseline).
-- [ ] Append the KG results row into the same comparison table/CSV so all four systems are visible side by side.
-- [ ] Manually tag or filter a **multi-hop subset** of `test.jsonl` — questions that require chaining facts across more than one entity/fact (e.g. "what did the CEO of the company that acquired X say about Y"). MMDocIR won't have this labeled for you; skim the question set and hand-pick ~15–20 candidates. This subset is the whole point — it's where graph traversal is *supposed* to beat plain vector similarity, and where the interesting result lives.
-- [ ] Write up findings: overall metric deltas (retrieval + generation) across all four systems, and a focused comparison on the multi-hop subset specifically. Include 2–3 concrete qualitative examples — the question, what Baseline retrieved, what KG retrieved, and which one was actually right.
+- [x] Run `KGPipeline.evaluate()` on the **same test subset size and same `RANDOM_SEED`** as whatever Baseline/Advanced/Agentic were evaluated on (check `results_agentic.json` and `src/results/pipeline_results.csv` for the size actually used previously — the README mentions both `EVAL_SUBSET_SIZE=150` defaults and 1000-query ablation runs, so pin down which one is the real comparison baseline). — **150 confirmed as the real baseline** (= the full `test.jsonl`, so `test_data[:150]` is a deterministic full-set slice; no `RANDOM_SEED` dependency to match). Ran KG on all 150 in 69.76s: `precision@1=0.0533, recall@5=0.20, ndcg@5=0.1279, map=0.1041, token_f1=0.0317, exact_match=0.0133`. **Important discrepancy found:** `src/results/pipeline_results.csv` (local, exploratory, many re-runs) does **not** match the numbers in the actually-submitted `DAT560_Group6_report.pdf` (e.g. CSV's oldest Baseline row has P@1=0.52; the report's Table 7 has P@1=0.5933). Treated the **report's Table 7/Table 6 as authoritative** (System 1 P@1=0.5933/NDCG@5=0.6693/TokenF1=0.1837; System 2 P@1=0.8667/NDCG@5=0.9043/TokenF1=0.2658; System 3 P@1=0.6066/NDCG@5=0.6695/TokenF1=0.1674) since that's what was actually graded — see Findings below.
+- [x] Append the KG results row into the same comparison table/CSV so all four systems are visible side by side. — Added `4_KG_Graph_Traversal (KGPipeline)` row to `src/results/pipeline_results.csv`.
+- [x] Manually tag or filter a **multi-hop subset** of `test.jsonl` — questions that require chaining facts across more than one entity/fact (e.g. "what did the CEO of the company that acquired X say about Y"). MMDocIR won't have this labeled for you; skim the question set and hand-pick ~15–20 candidates. This subset is the whole point — it's where graph traversal is *supposed* to beat plain vector similarity, and where the interesting result lives. — Hand-picked 19 questions into `src/data/test/multihop_subset.json` (indices + one-line justification each), e.g. "find the year from stat A, then look up stat B for that year," "resolve an entity from one figure, then look up its number in a separate table," "cross-reference two tables on a shared attribute."
+- [x] Write up findings: overall metric deltas (retrieval + generation) across all four systems, and a focused comparison on the multi-hop subset specifically. Include 2–3 concrete qualitative examples — the question, what Baseline retrieved, what KG retrieved, and which one was actually right. — See **Epic 2 Findings** below.
+
+### Epic 2 Findings (2026-07-17)
+
+**Overall (full 150-question test set), report numbers vs. fresh KG run:**
+
+| System | P@1 | NDCG@5 | MAP | Token F1 | Exact Match |
+|---|---|---|---|---|---|
+| System 1 — Baseline | 0.5933 | 0.6693 | 0.6478 | 0.1837 | 0.1333 |
+| System 2 — Advanced | 0.8667 | 0.9043 | 0.8944 | 0.2658 | 0.2067 |
+| System 3 — Agentic | 0.6066 | 0.6695 | 0.6544 | 0.1674 | 0.1133 |
+| **System 4 — KG (this run)** | **0.0533** | **0.1279** | **0.1041** | **0.0317** | **0.0133** |
+
+KG-only graph traversal is roughly **10x worse** on retrieval (P@1, NDCG@5, MAP) and **5x worse** on generation (Token F1) than every existing system, including the plain baseline. This is not a close result — vanilla GraphRAG-style traversal, as currently implemented, is a materially weaker retriever than BM25+dense on this corpus. (Note: KG's `semantic_similarity` column isn't comparable — `evaluate_generation()` falls back to `token_f1` when no embedder is passed, which is true by design for KG since it does no dense embedding at all; Token F1 is the fair cross-system column.)
+
+**Multi-hop subset (19 hand-picked questions), all four systems freshly run today on the identical subset, same underlying chunk source (`chunks_fixed_size.json` / `advanced_fixed_size` collection):**
+
+| System | P@1 | NDCG@5 | MAP/MRR | Token F1 | Exact Match | Wall time |
+|---|---|---|---|---|---|---|
+| Baseline | 0.6316 | 0.698 | 0.6842 | 0.0547 | 0.0526 (1/19) | 233.8s |
+| Advanced | 0.7895 | 0.8227 | 0.8158 | 0.0545 | 0.0526 (1/19) | 136.6s |
+| Agentic | 0.6316 | 0.698 | 0.6842 | 0.0702 | 0.0526 (1/19) | 306.7s (14.6s/query, matches report's ~12.16s) |
+| **KG** | **0.0** | **0.0789** | **0.0526** | 0.0549 | 0.0526 (1/19) | **11.1s** |
+
+Two findings stand out:
+
+1. **Retrieval finds the right document even on hard multi-hop questions (for the non-KG systems) — generation is the real bottleneck there.** P@1 for Baseline/Advanced/Agentic barely drops on this "hard" subset (0.63–0.79) vs. their full-set numbers (0.59–0.87), yet Exact Match collapses to exactly 1/19 for **all four systems**, KG included. Once the right page is retrieved, none of the four systems can reliably reason through the two-stage arithmetic/lookup (e.g. "find which year has stat A, then look up stat B for that year") that defines a multi-hop question — this is a `qwen3-vl:8b-instruct` reasoning-capacity ceiling, not a retrieval problem, for Systems 1–3.
+
+2. **KG's retrieval fails specifically because these multi-hop questions lack a single crisp named entity to seed on — and the exact bug Epic 1 fixed (short-name false positives) is still visible.** P@1=0.0 for KG on this subset — it never even surfaces the right source document, let alone the right fact. Example: for "How many more millions of dollars was the median exit valuation in the USA compared to Europe...", the seed-entity list included the node `"RoPE"` (a machine-learning term, Rotary Position Embeddings, extracted from an unrelated arXiv paper) purely because `"rope"` is a substring of `"Europe"` in the query. `KG_MIN_SEED_LENGTH` (Epic 1) filters 1–2 character noise but not this kind of accidental-substring collision on real short words — exactly the "smarter seed matching" (fuzzy/whole-word matching) that Epic 3 already scopes.
+
+**Qualitative examples (question / top retrieved doc / answer, all three non-agentic systems shown):**
+
+- *"How many more millions of dollars was the median exit valuation in the USA compared to Europe...?"* (GT: `63`) — **Baseline: retrieved `earlybird-...pdf` (correct deck) → answered `63` ✓. Advanced: same doc → `63` ✓. KG: retrieved 3 unrelated docs (a Trump-economy Pew survey, a crisis-PR slide deck, an EMNLP paper) → correctly said "cannot be derived from the context," scoring 0.** Textbook case of dense retrieval nailing it and KG missing the source document entirely.
+- *"What is the percentage of registered voters who support... the party with the higher total percentage of good policy ideas... in the survey conducted April 25 – May 1, 2018?"* (GT: `92%`, the most deliberately two-stage question in the subset) — **Baseline and Advanced both retrieved the actually-correct source (`PRE_2022.09.29_NSL-politics_REPORT.pdf`, a Pew "National Survey of Latinos" politics report) but still answered "No answer available" — right document, model couldn't chain the two conditions. KG retrieved three unrelated documents (an ACL paper, an Activision 10-K, an unrelated Pew economy report) and also declined to answer.** Same failure outcome, different cause: reasoning ceiling for Systems 1/2, retrieval failure for KG.
+- *"Among all 12 references in this report, how many are from its own research center?"* (GT: `8`) — all three systems answered `0`; Baseline/Advanced both retrieved the same wrong document (a Pew Hispanic-identity report, not the source PDF), KG retrieved a different but equally wrong set (an ACL paper, the ISEP student handbook). A case where nobody's retrieval worked — useful as a reminder that not every multi-hop failure is KG-specific.
+
+**Bottom line for the roadmap's stated goal ("prove whether it helps"):** on this corpus, in its current unpolished form, **KG-only graph traversal does not help — it is the weakest of the four systems, on the overall set and especially on the multi-hop subset it was hypothesized to help most.** This isn't a discouraging result so much as a clear, evidenced starting point for Epic 3 (entity resolution, smarter/fuzzy seed matching, edge-weighting/fan-out control) and Epic 4 (hybrid KG+dense+BM25, where the KG signal only has to *add* value on top of an already-strong retriever rather than replace it). The next re-benchmark after Epic 3's fixes is what will show whether this is a fixable implementation gap or a more fundamental mismatch between graph traversal and this corpus's question style.
 
 ---
 
