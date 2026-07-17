@@ -178,9 +178,9 @@ Consequently the resulting metrics are, within LLM-call noise, indistinguishable
 
 ## Epic 6 — Document and ship
 
-- [ ] Add "System 4 — Knowledge Graph RAG" (and "System 5 — Hybrid," if Epic 4 lands) to the README's Systems Overview table and architecture diagram, matching the existing style.
-- [ ] Write a results section — the four-way comparison table, the multi-hop breakdown, and the 2–3 qualitative examples from Epic 2 — either as a README addendum or an update to the report.
-- [ ] Clean, incremental commits on `feature/knowledge-graph-networkx`; open a PR against `main` on `dat560-2026/project-team-1` if teammates should see it, or keep it on your fork (`mygithub`) if this is personal/portfolio-track work beyond the graded deliverable.
+- [x] Add "System 4 — Knowledge Graph RAG" (and "System 5 — Hybrid," if Epic 4 lands) to the README's Systems Overview table and architecture diagram, matching the existing style. — Done: Systems Overview table, project structure tree, a new "Step 4" usage section, and Configuration parameter rows all updated in `README.md`.
+- [x] Write a results section — the four-way comparison table, the multi-hop breakdown, and the 2–3 qualitative examples from Epic 2 — either as a README addendum or an update to the report. — Done: new `## Results` section in `README.md` (full-set + multi-hop tables across all 5 systems, 5 condensed findings); full detail/reasoning/qualitative examples remain in this file's Epic 2–5 sections.
+- [ ] Clean, incremental commits on `feature/knowledge-graph-networkx`; open a PR against `main` on `dat560-2026/project-team-1` if teammates should see it, or keep it on your fork (`mygithub`) if this is personal/portfolio-track work beyond the graded deliverable. — Commits done (24+ logical commits across Epics 0–6, each with a scoped message). **Pushing/opening a PR was intentionally left for you to decide** — that's a visible action affecting a shared repo, not something to do unprompted.
 
 ---
 
