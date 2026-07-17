@@ -139,6 +139,14 @@ def make_query_rewriter_node(agent_llm, retriever, query_techniques_dict, config
             "query_rewriting": "improve phrasing (use when question has grammar issues, unclear wording, or lacks structure)",
             "query_expansion": "add synonyms (use when question uses domain-specific/niche terminology)"
         }
+        # Epic 5 (opt-in): only offered when KG routing was successfully built for this pipeline
+        if "kg_multihop" in query_techniques_dict:
+            techniques_info["kg_multihop"] = (
+                "knowledge-graph traversal + dense + BM25 (use for multi-hop/relational questions that "
+                "require chaining facts across multiple distinct entities — e.g. find an entity or value in "
+                "one place, then look up a related fact about it elsewhere, or cross-reference two separate "
+                "tables/figures on a shared attribute)"
+            )
         
         # On retry, add clear warning about last technique
         if last_technique and retry_count > 0:

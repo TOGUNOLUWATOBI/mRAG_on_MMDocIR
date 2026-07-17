@@ -290,3 +290,18 @@ class AgenticConfig(AdvancedConfig):
     """Whether to log all agent decisions (query rewriter, grader, generator) for analysis"""
     
     AGENT_LLM_MODEL: str = "qwen3-vl:8b-instruct"  # Lightweight LLM for agent decisions (Query Rewriter, Grader, Generator strategy)
+
+    # ===== KG ROUTING (Epic 5) =====
+    ENABLE_KG_ROUTING: bool = False
+    """
+    Opt-in: adds 'kg_multihop' as a 9th technique the query-rewriter agent can
+    select, routing multi-hop/relational questions through HybridKGRetriever
+    (KG traversal + dense + BM25) instead of the standard 8 dense-only
+    techniques. Requires the pipeline's chunking config to match the chunks
+    the KG graph was built from (chunks_fixed_size.json / advanced_fixed_size),
+    or the KG's chunk UIDs won't resolve. Off by default — existing Agentic
+    (System 3) behavior/benchmarks are unaffected unless explicitly enabled.
+    """
+    KG_ROUTING_HYBRID_KG_WEIGHT: float = 0.3
+    KG_ROUTING_HYBRID_DENSE_WEIGHT: float = 1.0
+    KG_ROUTING_HYBRID_BM25_WEIGHT: float = 1.0
