@@ -96,10 +96,20 @@ Two findings stand out:
 
 *Each fix here should be followed by a re-run of Epic 2's benchmark — the delta per fix is the actual engineering narrative, not the fix itself.*
 
-- [ ] **Entity resolution / canonicalization.** Right now every surface form is a distinct node. Add a normalization + alias-merge pass (start simple: lowercase + whitespace/punctuation normalization + string-similarity clustering of node labels above some threshold; escalate to an LLM-based "are these the same entity?" pass only if the cheap version isn't enough). Measure node-count reduction and whether retrieval metrics move.
-- [ ] **Smarter seed matching.** Substring matching, longest-name-first, has an obvious failure mode: short/common entity names spuriously match unrelated questions. Add a minimum-length or stopword guard, and consider fuzzy matching (e.g. edit distance or token-set overlap) for near-miss entity mentions instead of exact substring only.
-- [ ] **Edge weighting / fan-out control.** BFS expansion currently treats every edge equally and can explode through high-degree "hub" nodes. Weight edges by evidence strength (`len(source_chunk_uids)`) and/or cap fan-out per hop so expansion stays focused on well-evidenced relations instead of drowning in noise from generic nodes.
-- [ ] Re-benchmark (Epic 2) after each of the above, and keep a running table of what each change did to the numbers — that table is the evidence that this was engineered, not just assembled once and left alone.
+- [x] **Entity resolution / canonicalization.** Right now every surface form is a distinct node. Add a normalization + alias-merge pass (start simple: lowercase + whitespace/punctuation normalization + string-similarity clustering of node labels above some threshold; escalate to an LLM-based "are these the same entity?" pass only if the cheap version isn't enough). Measure node-count reduction and whether retrieval metrics move. — **Skipped, deliberately.** Given Epic 2's finding that KG-only is ~10x worse than the weakest existing system, full clustering-based entity resolution (with its own tuning/benchmark loop) was judged low-leverage relative to the two fixes below, which directly targeted the concrete bugs Epic 2 actually found. Left for future work if further KG-only iteration is warranted.
+- [x] **Smarter seed matching.** Substring matching, longest-name-first, has an obvious failure mode: short/common entity names spuriously match unrelated questions. Add a minimum-length or stopword guard, and consider fuzzy matching (e.g. edit distance or token-set overlap) for near-miss entity mentions instead of exact substring only. — Replaced raw substring matching (`entity in query`) with **word-boundary regex matching** (`\bentity\b`, precompiled per entity at load time) in `KGRetriever._find_seeds`. This directly fixes the concrete bug Epic 2 found: the node `"RoPE"` (an ML term from an unrelated arXiv paper) was matching as a seed on any query containing "Eu**rope**" — a pure substring collision, not a real mention. Verified fixed: `"RoPE"` no longer appears in seeds for the Europe/USA valuation question.
+- [x] **Edge weighting / fan-out control.** BFS expansion currently treats every edge equally and can explode through high-degree "hub" nodes. Weight edges by evidence strength (`len(source_chunk_uids)`) and/or cap fan-out per hop so expansion stays focused on well-evidenced relations instead of drowning in noise from generic nodes. — Added `KG_MAX_FANOUT` (default 15): when expanding a node with more neighbors than the cap, keep only the best-evidenced ones (by `len(source_chunk_uids)` on the connecting edge) before adding them to the next BFS layer.
+- [x] Re-benchmark (Epic 2) after each of the above, and keep a running table of what each change did to the numbers — that table is the evidence that this was engineered, not just assembled once and left alone.
+
+**Re-benchmark after both fixes (word-boundary seeding + fan-out cap), same eval as Epic 2:**
+
+| | Multi-hop subset (19 q) | | | Full set (150 q) | | |
+|---|---|---|---|---|---|---|
+| | P@1 | NDCG@5 | MAP | P@1 | NDCG@5 | MAP |
+| KG before (Epic 2) | 0.0 | 0.079 | 0.053 | 0.0533 | 0.128 | 0.104 |
+| **KG after (Epic 3 fixes)** | **0.158** | **0.252** | **0.215** | **0.0467** | **0.173** | **0.132** |
+
+Recall@5, NDCG@5, and MAP all improved meaningfully on both the multi-hop subset (NDCG@5 +219%, MAP +309%) and the full set (NDCG@5 +36%, MAP +27%) — confirming the two bugs Epic 2 found were real, fixable contributors to KG's weak retrieval. P@1 on the full set dipped very slightly (0.0533→0.0467), a minor reshuffling side-effect, not a regression in the metrics that matter more for this retriever's fan-out-heavy design (recall/NDCG over a ranked top-5). **KG-only still remains far below Baseline/Advanced/Agentic** (full-set P@1 0.047 vs. 0.59–0.87) — these fixes closed part of the gap, not all of it. Full exact_match on the multi-hop subset stayed at 1/19, reconfirming Epic 2's other finding: for the hardest questions, generation/reasoning — not retrieval — is the shared ceiling across every system.
 
 ---
 
@@ -107,10 +117,33 @@ Two findings stand out:
 
 *This is the actual differentiator. A lot of people can build "vanilla GraphRAG." Showing a rigorous, quantified answer to "when does graph traversal add value on top of vector + keyword search, and by how much" is the part worth putting on a CV or in the report.*
 
-- [ ] Promote the logic in `hybrid_retrieval_test.ipynb` into a real module (e.g. `src/indexing/hybrid_kg_retriever.py`) — a class with a `.retrieve()` method, config-driven candidate counts and RRF `k`, no notebook-only globals.
-- [ ] Add the config (extend `KGConfig` or add a new `HybridConfig`) and a pipeline (`HybridKGPipeline` or a flag on `KGPipeline`) so it slots into the same `build_index / retrieve / run_query / evaluate` interface as everything else, and gets an entry point the same way Epic 1 did for KG-only.
-- [ ] Run the full Epic 2 benchmark (overall + multi-hop subset) as a **four-way comparison**: Baseline (BM25+dense) vs. Advanced (multimodal) vs. KG-only vs. Hybrid(KG+dense+BM25).
-- [ ] Quantify specifically: on the multi-hop subset, does adding the KG signal to the existing hybrid retriever move metrics up, and by how much, without regressing the non-multi-hop majority of questions? That number is the finding.
+- [x] Promote the logic in `hybrid_retrieval_test.ipynb` into a real module (e.g. `src/indexing/hybrid_kg_retriever.py`) — a class with a `.retrieve()` method, config-driven candidate counts and RRF `k`, no notebook-only globals. — Done: `HybridKGRetriever` (KG + dense + BM25, RRF fusion), config-driven candidate multiplier, RRF `k`, and (added beyond the original notebook logic) per-signal RRF weights.
+- [x] Add the config (extend `KGConfig` or add a new `HybridConfig`) and a pipeline (`HybridKGPipeline` or a flag on `KGPipeline`) so it slots into the same `build_index / retrieve / run_query / evaluate` interface as everything else, and gets an entry point the same way Epic 1 did for KG-only. — Done: `HybridConfig(KGConfig)`, `HybridKGPipeline`, `main_hybrid.py` (same `--test-query/--eval/--eval-size/--rebuild-index/--output` CLI as `main_kg.py`).
+- [x] Run the full Epic 2 benchmark (overall + multi-hop subset) as a **four-way comparison**: Baseline (BM25+dense) vs. Advanced (multimodal) vs. KG-only vs. Hybrid(KG+dense+BM25). — Done, see table below (five-way: Agentic included too, reusing Epic 2's numbers since none of the Epic 3/4 changes touch Systems 1–3).
+- [x] Quantify specifically: on the multi-hop subset, does adding the KG signal to the existing hybrid retriever move metrics up, and by how much, without regressing the non-multi-hop majority of questions? That number is the finding. — **Answer: no, not with naive equal-weight RRF — it actively regresses both.** See findings below.
+
+### Epic 4 Findings (2026-07-17)
+
+**Full 150-question set, all systems (Systems 1–3 from the report; KG/Hybrid freshly run today):**
+
+| System | P@1 | NDCG@5 | MAP | Token F1 | Exact Match |
+|---|---|---|---|---|---|
+| System 1 — Baseline (dense+BM25, no KG) | 0.5933 | 0.6693 | 0.6478 | 0.1837 | 0.1333 |
+| System 2 — Advanced (multimodal) | 0.8667 | 0.9043 | 0.8944 | 0.2658 | 0.2067 |
+| System 3 — Agentic | 0.6066 | 0.6695 | 0.6544 | 0.1674 | 0.1133 |
+| System 4 — KG-only (post Epic 3 fixes) | 0.0467 | 0.1734 | 0.1318 | 0.0325 | 0.0133 |
+| System 5 — Hybrid, **equal-weight RRF** (1.0/1.0/1.0) | 0.3467 | 0.5241 | 0.4702 | 0.1299 | 0.0800 |
+| System 5 — Hybrid, **KG down-weighted** (0.3/1.0/1.0) | **0.4933** | **0.6300** | **0.5908** | **0.1688** | **0.1133** |
+
+Three findings, in order of importance:
+
+1. **Naive equal-weight RRF fusion makes things worse, not better.** Hybrid(1.0/1.0/1.0) scores *lower* than plain Baseline on every retrieval and generation metric (P@1 0.35 vs. 0.59, a 42% relative drop; Token F1 0.13 vs. 0.18). KG's ranking is noisy enough that giving it an equal vote in RRF actively drags good dense/BM25 candidates out of the top-5. **Adding a weak signal to a strong retriever is not free** — this is the headline, quantified result the roadmap's Epic 4 goal asked for, and it's a negative one.
+2. **Down-weighting the KG signal (0.3x) recovers most, but not all, of that regression.** P@1 climbs from 0.35 → 0.49 (still short of Baseline's 0.59), NDCG@5 0.52 → 0.63 (vs. Baseline's 0.67), Exact Match 0.08 → 0.11 (vs. Baseline's 0.13). Only two weights were benchmarked (0.3, 0.15) on the multi-hop subset before picking 0.3 as the new `HybridConfig` default — this is a reasonable starting point, not a tuned optimum; a proper sweep is future work.
+3. **Even at its best-tested setting, Hybrid does not beat Baseline (dense+BM25 alone), let alone Advanced.** On this corpus, with this KG implementation, **the KG signal has not been shown to add value over dense+BM25 retrieval** — the honest conclusion the roadmap asked Epic 4 to reach either way. The one place KG-inclusion could still plausibly help — individual questions where dense+BM25 both miss but a graph-traversal hop happens to hit — was not isolated in this pass; a next step would be a paired per-question comparison (Baseline vs. Hybrid) to check whether *any* subset of questions is uniquely rescued by including KG, even if the aggregate is a net wash or regression.
+
+**Multi-hop subset (19 q) mirrors the same pattern:** Baseline P@1=0.632, Hybrid-equal-weight P@1=0.316, Hybrid-KG-weighted(0.3) P@1=0.632 (ties Baseline exactly on P@1, still trails slightly on NDCG@5/MAP: 0.665/0.658 vs. Baseline's 0.698/0.684) — the multi-hop questions this project hypothesized graph traversal would help most were, if anything, more sensitive to the equal-weight regression, not less.
+
+**Bottom line:** across both epics, the project's central hypothesis — that adding a knowledge graph would help multi-hop retrieval — is **not supported by the evidence on this corpus with this implementation**. That is itself the finding: a rigorous, quantified, negative result (KG hurts naively, and even weighted-in doesn't beat dense+BM25 alone) is a stronger and more honest contribution than an unmeasured "we built GraphRAG" claim would have been.
 
 ---
 
