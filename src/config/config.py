@@ -219,6 +219,25 @@ class AdvancedConfig(BaselineConfig):
     """Enable answer format validation for string-comparison metrics (exact_match, contains_match, token_f1)"""
 
 @dataclass
+class KGConfig(BaselineConfig):
+    """Configuration for the Knowledge Graph RAG Pipeline."""
+
+    # Path where the serialized graph + chunks JSON will be saved/loaded
+    KG_GRAPH_FILE: str = str(DATA_DIR / "preprocessed" / "knowledge_graph.json")
+
+    # Number of BFS hops to expand from seed entities during retrieval
+    KG_HOPS: int = 2
+
+    # Model used for triple extraction — text-only (not the VL model).
+    # llama3:8b is fast (~3-4s/chunk) and reliable for JSON extraction.
+    # Switch to "qwen3:32b" for higher-quality triples at the cost of speed.
+    KG_EXTRACTION_MODEL: str = "llama3:8b"
+
+    # KG uses graph traversal — hybrid BM25+dense retrieval is not applicable
+    USE_HYBRID_RETRIEVAL: bool = False
+
+
+@dataclass
 class AgenticConfig(AdvancedConfig):
     """Configuration for System 3 Agentic RAG Pipeline."""
     
