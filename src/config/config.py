@@ -233,6 +233,11 @@ class KGConfig(BaselineConfig):
     # are noise, not real entities — they false-positive-match almost every query.
     KG_MIN_SEED_LENGTH: int = 3
 
+    # Cap on neighbors expanded per node per BFS hop, keeping only the best-evidenced
+    # ones. Without this, generic high-degree hub nodes ("students", degree 200+)
+    # flood retrieval results with unrelated chunks within a single hop.
+    KG_MAX_FANOUT: int = 15
+
     # Model used for triple extraction — text-only (not the VL model).
     # llama3:8b is fast (~3-4s/chunk) and reliable for JSON extraction.
     # Switch to "qwen3:32b" for higher-quality triples at the cost of speed.
@@ -240,6 +245,31 @@ class KGConfig(BaselineConfig):
 
     # KG uses graph traversal — hybrid BM25+dense retrieval is not applicable
     USE_HYBRID_RETRIEVAL: bool = False
+
+
+@dataclass
+class HybridConfig(KGConfig):
+    """Configuration for the Hybrid KG + Dense + BM25 RAG Pipeline (System 5)."""
+
+    # Use the already-populated collection built from the same chunks_fixed_size.json
+    # the KG graph was built from, so the three signals are over identical chunks.
+    VECTOR_DB_COLLECTION: str = "advanced_fixed_size"
+
+    # Reciprocal Rank Fusion constant — higher values flatten rank differences
+    HYBRID_RRF_K: int = 60
+
+    # Each signal fetches top_k * multiplier candidates before fusion
+    HYBRID_CANDIDATE_MULTIPLIER: int = 10
+
+    # Per-signal RRF weights. KG traversal is empirically noisier than dense/BM25 on
+    # this corpus (see KG_ROADMAP.md Epic 4 findings) — equal weighting (1.0) let KG's
+    # noise outvote good dense/BM25 candidates and regressed P@1 from 0.59 (Baseline,
+    # no KG) to 0.35. Benchmarked 1.0 vs 0.3 vs 0.15 on the full 150-question set;
+    # 0.3 recovered most of that regression (P@1 0.49) without a further benchmark
+    # sweep to find an exact optimum — set as the default.
+    HYBRID_KG_WEIGHT: float = 0.3
+    HYBRID_DENSE_WEIGHT: float = 1.0
+    HYBRID_BM25_WEIGHT: float = 1.0
 
 
 @dataclass
