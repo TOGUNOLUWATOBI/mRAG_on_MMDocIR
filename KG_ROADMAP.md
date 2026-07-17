@@ -151,9 +151,28 @@ Three findings, in order of importance:
 
 *Only attempt this if Epics 0–4 land cleanly with time to spare — it's the most architecturally interesting piece but also the most integration work.*
 
-- [ ] In the existing LangGraph agentic pipeline (`src/agentic/graph/`, `pipelines/agentic_pipeline.py`), add KG retrieval as an additional tool/branch.
-- [ ] Have the query-rewriter or grader agent classify a question as multi-hop/relational vs. direct-lookup, and route multi-hop questions specifically through the KG (or hybrid) retriever instead of the standard technique — the same "classify then route" pattern already used successfully in your other course's multimodal retrieval strategy (Strategy 4: text/visual classification → route accordingly).
-- [ ] Benchmark Agentic+KG-routing vs. plain Agentic (System 3) on the same multi-hop subset.
+- [x] In the existing LangGraph agentic pipeline (`src/agentic/graph/`, `pipelines/agentic_pipeline.py`), add KG retrieval as an additional tool/branch. — Added `KGMultihopRetrieval` (`src/query_techniques/kg_multihop.py`), a `QueryTechnique`-conforming wrapper around `HybridKGRetriever`, plumbed in as a 9th selectable technique via `AgenticConfig.ENABLE_KG_ROUTING` (opt-in, default `False` — existing Agentic/System 3 behavior is unaffected unless explicitly enabled).
+- [x] Have the query-rewriter or grader agent classify a question as multi-hop/relational vs. direct-lookup, and route multi-hop questions specifically through the KG (or hybrid) retriever instead of the standard technique — the same "classify then route" pattern already used successfully in your other course's multimodal retrieval strategy (Strategy 4: text/visual classification → route accordingly). — Implemented as designed: added `kg_multihop` to the query-rewriter's existing free-choice technique menu (the same mechanism it already uses to pick among the other 8 techniques) with a description explicitly telling it to use `kg_multihop` for "multi-hop/relational questions that require chaining facts across multiple distinct entities."
+- [x] Benchmark Agentic+KG-routing vs. plain Agentic (System 3) on the same multi-hop subset. — Done, see findings below.
+
+### Epic 5 Findings (2026-07-17)
+
+Ran Agentic with `ENABLE_KG_ROUTING=True` on the same 19-question multi-hop subset used throughout Epics 2/4.
+
+**The query-rewriter agent never once selected `kg_multihop`, across all 19 multi-hop questions:**
+
+| Technique chosen | Count |
+|---|---|
+| `standard` | 8 |
+| `hyde` | 6 |
+| `query_decomposition` | 5 |
+| `kg_multihop` | **0** |
+
+Consequently the resulting metrics are, within LLM-call noise, indistinguishable from plain Agentic on the same subset (P@1 0.632 both; NDCG@5 0.665 vs. 0.698; Token F1 0.053 vs. 0.070; Exact Match 0.053 both, 1/19) — the small deltas are call-to-call variance in the agent's own decisions, not an effect of KG routing, because KG routing was never invoked.
+
+**Why this is still a real (if smaller) finding, not a non-result:** the "classify then route" design here relies on the query-rewriter LLM recognizing multi-hop questions from a text description and voluntarily picking `kg_multihop` over 8 already-familiar-sounding alternatives — and it didn't, not once, even though every question in the subset was deliberately curated to be exactly the kind of question the description called out. Two explanations, not mutually exclusive: (1) the agent's existing options (especially `query_decomposition`) already sound like a plausible match for "multi-part" questions, so `kg_multihop` never wins the choice; (2) per Epic 4's findings, `HybridKGRetriever` doesn't actually outperform the dense+BM25 techniques the agent already has access to on this subset (P@1 0.632 tied, not exceeded, at the best-tested weighting) — so even a perfectly-calibrated classifier routing every multi-hop question to `kg_multihop` would not have been expected to improve on plain Agentic's numbers here. **This session did not run that forced-routing control** (bypass the agent's free choice and force `kg_multihop` for all 19 questions through the full Agentic generation/grading loop) — that would isolate "does forced routing help" from "does the agent choose to route," and is the natural next step if this is revisited.
+
+**Bottom line:** the architecture works end-to-end (no crashes, clean opt-in via config, technique correctly loads and is available), but this pass could not demonstrate a benefit from agent-routed KG queries — consistent with, and further reinforcing, Epics 2–4's central finding that KG/hybrid retrieval does not currently outperform this project's existing dense+BM25 retrieval on this corpus.
 
 ---
 
