@@ -228,6 +228,11 @@ class KGConfig(BaselineConfig):
     # Number of BFS hops to expand from seed entities during retrieval
     KG_HOPS: int = 2
 
+    # Minimum character length for an entity to be usable as a seed match.
+    # Extraction produces some single/double-character node labels ("N", "RE") that
+    # are noise, not real entities — they false-positive-match almost every query.
+    KG_MIN_SEED_LENGTH: int = 3
+
     # Model used for triple extraction — text-only (not the VL model).
     # llama3:8b is fast (~3-4s/chunk) and reliable for JSON extraction.
     # Switch to "qwen3:32b" for higher-quality triples at the cost of speed.

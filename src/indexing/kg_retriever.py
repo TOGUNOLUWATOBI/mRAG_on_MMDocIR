@@ -29,17 +29,26 @@ class KGRetriever:
         graph: nx.DiGraph,
         chunks: List[Dict[str, Any]],
         hops: int = 2,
+        min_seed_length: int = 3,
     ):
         self.graph = graph
         self.hops = hops
+        self.min_seed_length = min_seed_length
 
         # UID → chunk dict for O(1) lookup
         self.chunk_index: Dict[str, Dict] = {
             f"{c['pdf_name']}::{c['chunk_id']}": c for c in chunks
         }
 
-        # Sort entities longest-first so more specific names match before substrings
-        self.entities: List[str] = sorted(graph.nodes(), key=len, reverse=True)
+        # Sort entities longest-first so more specific names match before substrings.
+        # Drop entities shorter than min_seed_length: single/double-character node
+        # labels are near-always extraction noise ("N", "y", "RE"), not real entities,
+        # and match as false-positive seeds in almost every query.
+        self.entities: List[str] = sorted(
+            (e for e in graph.nodes() if len(e) >= min_seed_length),
+            key=len,
+            reverse=True,
+        )
 
     # ------------------------------------------------------------------
     def _find_seeds(self, query: str) -> List[str]:
@@ -84,9 +93,12 @@ class KGRetriever:
                         results.append({
                             "text": chunk["text"],
                             "score": 1.0,
-                            "metadata": {
+                            # "payload" matches the schema Qdrant-backed retrievers use
+                            # (vector_database.py) so evaluate_retrieval() works unmodified.
+                            "payload": {
                                 "chunk_id": chunk["chunk_id"],
                                 "pdf_name": chunk["pdf_name"],
+                                "page_numbers": chunk.get("page_numbers"),
                                 "uid": uid,
                             },
                         })
