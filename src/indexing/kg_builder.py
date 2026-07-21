@@ -51,9 +51,19 @@ class KGBuilder:
 
     # ------------------------------------------------------------------
     def _extract_triples(self, text: str, chunk_uid: str) -> List[Dict[str, str]]:
+        user_content = _USER_TEMPLATE.format(text=text[:2000])
+        if self.model.startswith("qwen3"):
+            # Ollama's `think=False` API param is documented elsewhere in this
+            # codebase (generation/generator.py's VisionGenerator._inject_no_think)
+            # as unreliable for qwen3-family models on this server — the reliable
+            # soft-switch is a literal "/no_think" prefix. llama3:8b (the current
+            # default KG_EXTRACTION_MODEL) has no such issue and isn't affected by
+            # this branch; this only matters if KG_EXTRACTION_MODEL is switched to
+            # a qwen3 model (e.g. qwen3:32b, as considered in KG_ROADMAP.md).
+            user_content = "/no_think\n" + user_content
         messages = [
             {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user", "content": _USER_TEMPLATE.format(text=text[:2000])},
+            {"role": "user", "content": user_content},
         ]
         try:
             resp = self._client.chat(
@@ -64,6 +74,11 @@ class KGBuilder:
                 think=False,
             )
             raw = getattr(getattr(resp, "message", None), "content", "") or ""
+            # Defensively strip a <think>...</think> block even if the /no_think
+            # prefix above didn't fully suppress it — without this, a stray think
+            # block would break json.loads and silently zero out this chunk's
+            # triples (caught by the broad except below, logged, easy to miss).
+            raw = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL)
             # Strip markdown fences if the model wrapped its output
             raw = re.sub(r"```(?:json)?", "", raw).strip().rstrip("`")
             triples = json.loads(raw)

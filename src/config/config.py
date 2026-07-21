@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import os
 from dotenv import load_dotenv
 
@@ -238,6 +238,10 @@ class KGConfig(BaselineConfig):
     # flood retrieval results with unrelated chunks within a single hop.
     KG_MAX_FANOUT: int = 15
 
+    # Ablation switch only — set False to reproduce pre-Epic-3 raw-substring seed
+    # matching (isolates its contribution from KG_MAX_FANOUT's). Leave True.
+    KG_USE_WORD_BOUNDARY_SEEDS: bool = True
+
     # Model used for triple extraction — text-only (not the VL model).
     # llama3:8b is fast (~3-4s/chunk) and reliable for JSON extraction.
     # Switch to "qwen3:32b" for higher-quality triples at the cost of speed.
@@ -305,3 +309,11 @@ class AgenticConfig(AdvancedConfig):
     KG_ROUTING_HYBRID_KG_WEIGHT: float = 0.3
     KG_ROUTING_HYBRID_DENSE_WEIGHT: float = 1.0
     KG_ROUTING_HYBRID_BM25_WEIGHT: float = 1.0
+
+    # Forced-routing control: bypasses the query-rewriter agent's free 9-way
+    # technique choice entirely, always using the named technique instead. Exists
+    # to isolate "does routing to kg_multihop actually help" from "does the agent
+    # choose to route there" — Epic 5 found the agent chose kg_multihop 0/19 times
+    # on the multi-hop subset, so its effect (if any) was never measured. None
+    # (default) preserves normal agent free-choice behavior.
+    FORCE_TECHNIQUE: Optional[str] = None

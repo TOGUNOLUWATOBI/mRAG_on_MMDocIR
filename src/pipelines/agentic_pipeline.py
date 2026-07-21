@@ -104,6 +104,7 @@ class AgenticRAGPipeline(BaseRAGPipeline):
                 hops=kg_config.KG_HOPS,
                 min_seed_length=kg_config.KG_MIN_SEED_LENGTH,
                 max_fanout=kg_config.KG_MAX_FANOUT,
+                use_word_boundary_seeds=kg_config.KG_USE_WORD_BOUNDARY_SEEDS,
             )
             hybrid_kg_retriever = HybridKGRetriever(
                 kg_retriever=kg_retriever,
@@ -196,6 +197,7 @@ class AgenticRAGPipeline(BaseRAGPipeline):
             'GRADER_CONFIDENCE_THRESHOLD': getattr(self.config, 'GRADER_CONFIDENCE_THRESHOLD', 0.6),
             'RETRY_ON_LOW_CONFIDENCE': getattr(self.config, 'RETRY_ON_LOW_CONFIDENCE', True),
             'AGENT_DECISION_LOGGING': getattr(self.config, 'AGENT_DECISION_LOGGING', True),
+            'FORCE_TECHNIQUE': getattr(self.config, 'FORCE_TECHNIQUE', None),
         }
         
         self.agentic_graph = build_agentic_graph( # Build the LangGraph StateGraph using the builder function, passing all dependencies

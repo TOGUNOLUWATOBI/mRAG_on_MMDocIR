@@ -33,11 +33,18 @@ class KGRetriever:
         hops: int = 2,
         min_seed_length: int = 3,
         max_fanout: int = 15,
+        use_word_boundary_seeds: bool = True,
     ):
         self.graph = graph
         self.hops = hops
         self.min_seed_length = min_seed_length
         self.max_fanout = max_fanout
+        # Ablation switch (see KG_ROADMAP.md "Tier 1" follow-up): lets a caller
+        # reproduce the pre-Epic-3 raw-substring seed matching to isolate its
+        # individual contribution from KG_MAX_FANOUT's. Not meant to be disabled
+        # in normal use — word-boundary matching fixes a real false-positive bug
+        # (see the docstring below).
+        self.use_word_boundary_seeds = use_word_boundary_seeds
 
         # UID → chunk dict for O(1) lookup
         self.chunk_index: Dict[str, Dict] = {
@@ -68,6 +75,9 @@ class KGRetriever:
     # ------------------------------------------------------------------
     def _find_seeds(self, query: str) -> List[str]:
         query_lower = query.lower()
+        if not self.use_word_boundary_seeds:
+            # Pre-Epic-3 behavior, kept only for the ablation grid.
+            return [e for e in self.entities if e.lower() in query_lower]
         return [e for e, pattern in self._entity_patterns if pattern.search(query_lower)]
 
     def _weighted_neighbors(self, node: str) -> List[Tuple[str, int]]:
@@ -109,11 +119,18 @@ class KGRetriever:
         return layers
 
     def _collect_chunks(self, layers: List[Set[str]], top_k: int) -> List[Dict[str, Any]]:
-        # Iterate layer-by-layer so seed chunks rank first, then 1-hop, then 2-hop
+        # Iterate layer-by-layer so seed chunks rank first, then 1-hop, then 2-hop.
+        # Within a layer, `nodes` is a Python set — iterating it directly is NOT
+        # deterministic across process runs (str hashing is salted per-process by
+        # PYTHONHASHSEED), so two runs of the identical query/graph could silently
+        # return different chunks whenever a layer has more candidates than the
+        # remaining top_k budget. Sorting imposes a fixed, reproducible order; it's
+        # alphabetical (not a relevance ranking — see KG_ROADMAP.md's Tier 2 items
+        # for real per-chunk scoring), chosen only to make results reproducible.
         seen_uids: Set[str] = set()
         results = []
         for nodes in layers:
-            for node in nodes:
+            for node in sorted(nodes):
                 if node not in self.graph:
                     continue
                 for uid in self.graph.nodes[node].get("source_chunk_uids", []):
