@@ -111,6 +111,8 @@ Two findings stand out:
 
 Recall@5, NDCG@5, and MAP all improved meaningfully on both the multi-hop subset (NDCG@5 +219%, MAP +309%) and the full set (NDCG@5 +36%, MAP +27%) — confirming the two bugs Epic 2 found were real, fixable contributors to KG's weak retrieval. P@1 on the full set dipped very slightly (0.0533→0.0467), a minor reshuffling side-effect, not a regression in the metrics that matter more for this retriever's fan-out-heavy design (recall/NDCG over a ranked top-5). **KG-only still remains far below Baseline/Advanced/Agentic** (full-set P@1 0.047 vs. 0.59–0.87) — these fixes closed part of the gap, not all of it. Full exact_match on the multi-hop subset stayed at 1/19, reconfirming Epic 2's other finding: for the hardest questions, generation/reasoning — not retrieval — is the shared ceiling across every system.
 
+> **CORRECTION (see "Tier 1 follow-ups" below):** an ablation grid run later isolated the two fixes and found **the fan-out cap contributed nothing measurable to the numbers above** — capped and uncapped results are bit-for-bit identical on both eval sets. The entire improvement here is attributable to word-boundary seed matching alone. Separately, this table's numbers are themselves **not fully reproducible**: `_collect_chunks` iterated a Python `set()` in hash-randomized order, so a since-added determinism fix changes these exact figures (in both directions — see below). The fan-out cap fix is still real and defensible (the noise it targets exists), it just doesn't reach the final top-5 output at current `TOP_K=5`/`KG_HOPS=2` settings — see "Tier 1 follow-ups" for why and the corrected numbers.
+
 ---
 
 ## Epic 4 — Formalize the hybrid KG + Dense + BM25 retriever
@@ -174,6 +176,8 @@ Consequently the resulting metrics are, within LLM-call noise, indistinguishable
 
 **Bottom line:** the architecture works end-to-end (no crashes, clean opt-in via config, technique correctly loads and is available), but this pass could not demonstrate a benefit from agent-routed KG queries — consistent with, and further reinforcing, Epics 2–4's central finding that KG/hybrid retrieval does not currently outperform this project's existing dense+BM25 retrieval on this corpus.
 
+> **CORRECTION (see "Tier 1 follow-ups" below):** the "0/19, never chosen" claim above was wrong — caused by a real bug (`QueryRewriterDecision`'s Pydantic `Literal` type never listed `"kg_multihop"` as a valid value, so a genuine LLM choice of it failed validation and was silently miscounted as a parsing error, falling back to `"standard"`). Fixed and re-run: the agent actually chose `kg_multihop` **3/19** times, and the corrected free-choice result **slightly exceeds** plain Agentic (P@1 0.684 vs. 0.632). Left here unmodified, with this note, so the correction is traceable — see "Tier 1 follow-ups" for the full, corrected numbers.
+
 ---
 
 ## Epic 6 — Document and ship
@@ -189,3 +193,75 @@ Consequently the resulting metrics are, within LLM-call noise, indistinguishable
 - **Epics 0–2 are the must-do floor** — cheap, mostly wiring and one evaluation run, and they're what turns this from "half-built" into "real and measured." Do these regardless of how much further time you have.
 - **Epics 3–4 are where the actual differentiation lives** — this is what separates "I followed a GraphRAG tutorial" from "I measured where graph retrieval helps and improved it." Worth the deeper time investment if you're treating this as more than a course footnote.
 - **Epics 5–6 are polish/stretch** — valuable if Epics 0–4 leave time on the table, skippable if they don't.
+
+---
+
+## Epic 7 — Tier 1 follow-ups (post-mortem improvement pass)
+
+After Epic 6, a structured improvement-finding pass (parallel research across 8 dimensions — entity resolution, extraction quality, retrieval matching, ranking/scoring, structural fit, fusion strategy, agent routing, evaluation rigor — with adversarial verification of every proposal) produced 40 candidate improvements. Most were rejected (already-tried, empirically falsified, or low-leverage relative to the ~10x/5x gap); five cheap, high-information-value "Tier 1" items survived and were implemented and benchmarked. One of them surfaced a real bug that changes a previous conclusion.
+
+**One finding that reframed the whole retrieval-matching dimension, established before any code changed:** an adversarial verification agent empirically ran `KGRetriever._find_seeds` against all 150 test questions and found the "no seed found" fallback fires **0% of the time** (median 11–12 seed entities match per query, even post-Epic-3). The graph isn't under-matching — it's drowning in matches. This ruled out an entire category of proposal (fuzzy matching, embedding-based entity linking, query-side NER, acronym expansion — all "find more seeds") and pointed at the real problem: precision/ranking, not recall.
+
+### 1. Deterministic chunk ordering (`KGRetriever._collect_chunks`)
+
+**Bug:** chunks within a BFS layer were collected by iterating a Python `set()` directly — `str` hashing is salted per-process (`PYTHONHASHSEED`), so the exact same query against the exact same graph could return **different top-5 chunks on different process runs**, whenever a layer had more candidates than the remaining `top_k` budget (common — see finding 4 below). This was actually observed mid-session during Epic 1 debugging (two consecutive runs of one query gave different retrieved docs) but never fixed.
+
+**Fix:** sort each layer's nodes alphabetically before collecting (`src/indexing/kg_retriever.py`). This is a reproducibility fix, not a relevance-ranking improvement — alphabetical order carries no meaning; it's just now the *same* order every time. Real per-chunk relevance scoring remains unbuilt (Tier 2/3 territory — every chunk still nominally gets `score: 1.0`).
+
+**Consequence — a real, honest correction to earlier numbers:** re-running KG-only after just this fix (word-boundary + fan-out cap unchanged) gives materially different results than Epic 3's originally-reported table, in *both* directions:
+
+| Config | Multi-hop (19q) P@1 | Full set (150q) P@1 |
+|---|---|---|
+| Epic 3 report (hash-random order) | 0.158 | 0.047 |
+| **Now (deterministic, alphabetical order)** | **0.0** | **0.14** |
+
+The multi-hop subset got *worse* (0.158 → 0.0) and the full set got *better* (0.047 → 0.14) — purely from changing an arbitrary tie-break, nothing else. **This means the Epic 2–4 single-run deltas throughout this roadmap were themselves not fully reproducible**, and reinforces (independently) the improvement-pass's own "evaluation rigor" dimension finding: n=19 is small enough that single-run numbers should be read as suggestive, not conclusive, until repeated-trial variance or significance testing is added (still not done — noted as open below).
+
+### 2. `think=False` bug fix in `kg_builder.py` (defensive, for future model upgrades)
+
+**Finding:** `kg_builder.py`'s triple-extraction call passes Ollama's `think=False` with no `/no_think` prompt injection — the exact same qwen3-family unreliability `generation/generator.py`'s `VisionGenerator` already had to work around elsewhere in this codebase. The current default (`llama3:8b`) isn't affected, but a future switch to `qwen3:32b` (considered in Epic 3 as a possible extraction-quality upgrade) would hit this silently: a leaked `<think>` block breaks `json.loads` and zeroes out that chunk's triples.
+
+**Fix:** inject `/no_think` for qwen3-family models specifically (leaves `llama3:8b` behavior unchanged), plus defensively strip any `<think>...</think>` block from the raw response before parsing, regardless of model. Not yet exercised against a real qwen3 extraction run — no model upgrade has been attempted — but the landmine is now defused for when/if one is.
+
+### 3 & 4. Forced-routing control — and a second real bug found along the way
+
+**What was built:** `AgenticConfig.FORCE_TECHNIQUE` (default `None`) short-circuits `query_rewriter_node` to always pick a named technique, bypassing the LLM decision — isolating "does routing to `kg_multihop` help" from "does the agent choose to route there."
+
+**Bug found while smoke-testing it:** forcing `kg_multihop` crashed with a Pydantic validation error — `QueryRewriterDecision`'s `technique` field is a `Literal` type that **never included `"kg_multihop"`** as a valid value, even though Epic 5 added it as a 9th selectable technique. Fixed (`src/agentic/tools/output_parser.py`).
+
+**This bug wasn't just a forced-routing problem — it silently corrupted Epic 5's own original finding.** Without `"kg_multihop"` in the `Literal`, a genuine LLM choice of it would fail Pydantic validation, get caught by `query_rewriter_node`'s broad `except Exception`, and get miscounted as a parsing error falling back to `"standard"` — indistinguishable from a real parse failure. Checking the original Epic 5 run: **4/19 questions had "Error in parsing, using baseline"** as their logged reasoning. Re-running with the bug fixed:
+
+| Run | P@1 | NDCG@5 | MAP | Token F1 | Exact Match | `kg_multihop` selected |
+|---|---|---|---|---|---|---|
+| Plain Agentic (no KG routing, Epic 2) | 0.632 | 0.698 | 0.684 | 0.070 | 0.053 (1/19) | n/a |
+| Agentic + KG routing, free choice — **as originally reported (buggy)** | 0.632 | 0.698 | 0.684 | 0.070 | 0.053 (1/19) | 0/19 (miscounted) |
+| **Agentic + KG routing, free choice — corrected** | **0.684** | **0.717** | **0.711** | 0.070 | 0.053 (1/19) | **3/19** |
+| Agentic + KG routing, **forced** (100%) | 0.579 | 0.639 | 0.623 | 0.053 | 0.053 (1/19) | 19/19 |
+
+**Corrected finding — reverses part of Epic 5's original conclusion:** the agent does choose `kg_multihop` when it's actually able to (3/19, all genuinely relational-sounding questions — e.g. "the method located at the bottom of the model structure figure"), and the corrected free-choice run **slightly exceeds** plain Agentic on every retrieval metric (P@1 +8%, NDCG@5 +3%, MAP +4%). *However*, forcing `kg_multihop` on all 19 questions performs *worse* than letting the agent choose selectively (P@1 0.579 vs. 0.684) — selective routing beats blanket routing, which is itself informative: the agent's judgment about *when* to route, on the cases it does route, is doing real work, even though a majority of genuinely multi-hop questions still don't get routed there. None of the 3 `kg_multihop`-routed questions were answered correctly in the end (`CANNOT_FIND_ANSWER` for all 3, generation-side reasoning ceiling as established elsewhere) — the gain is retrieval-only, consistent with everything else this roadmap has found about where the bottleneck actually sits for hard questions.
+
+Treat all four numbers in this table with the same n=19/single-run caveat as finding 1 — a repeated-trial or significance-tested re-run (still open, see below) would strengthen this materially.
+
+### 5. Ablation grid: isolating word-boundary matching from the fan-out cap
+
+**What was built:** `KGConfig.KG_USE_WORD_BOUNDARY_SEEDS` (default `True`) lets `_find_seeds` fall back to pre-Epic-3 raw substring matching; combined with setting `KG_MAX_FANOUT` to a very large number, this reproduces all 4 cells of the 2×2 grid (word-boundary × fan-out-cap) that Epic 3 bundled into one reported number.
+
+| Config | Multi-hop (19q) P@1 / NDCG@5 / MAP | Full set (150q) P@1 / NDCG@5 / MAP |
+|---|---|---|
+| raw substring + no cap (pre-Epic-3) | 0.0 / 0.023 / 0.013 | 0.040 / 0.102 / 0.083 |
+| word-boundary + no cap | 0.0 / 0.026 / 0.018 | 0.140 / 0.226 / 0.199 |
+| raw substring + fan-out cap | 0.0 / 0.023 / 0.013 *(identical to no-cap row)* | 0.040 / 0.102 / 0.083 *(identical)* |
+| **word-boundary + fan-out cap (current)** | 0.0 / 0.026 / 0.018 *(identical to no-cap row)* | 0.140 / 0.226 / 0.199 *(identical)* |
+
+**Finding: the fan-out cap makes zero measurable difference, on either eval set, at current settings.** Capped and uncapped rows are bit-for-bit identical. Investigated why directly: `_collect_chunks` fills the `top_k=5` budget by iterating BFS layers seed-layer-first, and the seed layer alone routinely supplies far more than 5 candidate chunks before hop-1/hop-2 (where `KG_MAX_FANOUT` actually operates) is ever reached — confirmed concretely for one query, where 14 matched seed entities contributed **50 chunk-slots** before dedup, ten times the `top_k` budget. `KG_MAX_FANOUT` only limits which *neighbor nodes* get added during BFS expansion; it does not cap how many chunks a single node (seed or otherwise) contributes directly, so even the seed layer's own dilution problem (a generic seed like "time" contributing 14 chunks alongside a specific one like "Europe" contributing 11, with no evidence-based priority between them) is untouched by the fix that was supposed to address exactly this.
+
+**Corrected attribution:** all of Epic 3's reported improvement is attributable to word-boundary matching alone. The fan-out cap is not wrong to have added — the noise pattern it targets (hub nodes exploding BFS expansion) is real and would matter at a larger `top_k` or more hops — but it currently does nothing observable, and the real remaining seed-layer dilution problem it doesn't reach is a legitimate Tier 2 target (per-chunk scoring / specificity weighting, from the improvement pass's `ranking_scoring` dimension).
+
+### Not done this pass
+
+- **Paired per-question rescue analysis** (does Hybrid/KG ever uniquely get right what Baseline gets wrong, across the full 150) — blocked by a recurring network issue on this machine (SSL interception prevents the embedder from loading; Baseline/Advanced/Hybrid all need it, KG-only doesn't). Deferred at the user's call rather than working around it. Still the single highest-value open question from the whole improvement pass.
+- **Repeated-trial variance / significance testing** — every number in this Epic 7 section (and, it turns out, in Epics 2–4) is a single run. Finding 1 above is direct proof this matters.
+
+### Commits
+
+Code: word-boundary/no-word-boundary ablation switch + deterministic sort (`kg_retriever.py`), `think=False` fix (`kg_builder.py`), `FORCE_TECHNIQUE` + `kg_multihop` Literal fix (`config.py`, `agentic_pipeline.py`, `agentic/graph/nodes.py`, `agentic/tools/output_parser.py`). Results: `kg_ablation_grid.json`, `agentic_kg_forced_routing_multihop.json`, `agentic_kg_routing_multihop_v2.json`.
