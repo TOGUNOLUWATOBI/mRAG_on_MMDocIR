@@ -3,6 +3,7 @@
 # nodes in the graph, expand their neighborhood via BFS, then collect the source
 # chunks attached to the visited nodes as context for generation.
 import logging
+import math
 import re
 from typing import Any, Dict, List, Set, Tuple
 
@@ -25,6 +26,11 @@ class KGRetriever:
     Fallback when no entity is found in the query: use the top-degree nodes
     (most-connected entities = most central concepts in the corpus).
     """
+
+    # Per-hop score multiplier — seed-layer chunks outrank 1-hop, which outrank
+    # 2-hop, but as a graded decay rather than the old hard layer partition.
+    # Hops beyond this list decay geometrically from the last entry.
+    HOP_DECAY = [1.0, 0.5, 0.25]
 
     def __init__(
         self,
@@ -118,40 +124,68 @@ class KGRetriever:
             layers.append(set(next_frontier))
         return layers
 
+    def _node_specificity(self, node: str) -> float:
+        """Rare, specific entities should outrank generic hub matches — e.g. a
+        query mentioning "NTU" (69 source chunks) is more informative than one
+        that happens to also match "students" (115 source chunks, a generic hub
+        that co-occurs with almost any education-related question). Reuses the
+        same evidence-count statistic KG_MAX_FANOUT already uses for edges,
+        applied here to a node's own total evidence (source_chunk_uids count).
+        """
+        evidence = len(self.graph.nodes[node].get("source_chunk_uids", []))
+        return 1.0 / (1.0 + math.log1p(max(evidence, 1)))
+
+    def _hop_weight(self, hop: int) -> float:
+        if hop < len(self.HOP_DECAY):
+            return self.HOP_DECAY[hop]
+        # Geometric decay beyond the configured hops, halving each further hop.
+        extra_hops = hop - len(self.HOP_DECAY) + 1
+        return self.HOP_DECAY[-1] * (0.5 ** extra_hops)
+
     def _collect_chunks(self, layers: List[Set[str]], top_k: int) -> List[Dict[str, Any]]:
-        # Iterate layer-by-layer so seed chunks rank first, then 1-hop, then 2-hop.
-        # Within a layer, `nodes` is a Python set — iterating it directly is NOT
-        # deterministic across process runs (str hashing is salted per-process by
-        # PYTHONHASHSEED), so two runs of the identical query/graph could silently
-        # return different chunks whenever a layer has more candidates than the
-        # remaining top_k budget. Sorting imposes a fixed, reproducible order; it's
-        # alphabetical (not a relevance ranking — see KG_ROADMAP.md's Tier 2 items
-        # for real per-chunk scoring), chosen only to make results reproducible.
+        # Score each chunk by (hop-distance decay) x (contributing node's
+        # specificity), then sort once by score. Previously every chunk got a
+        # hardcoded score of 1.0 and ordering was purely "seed layer, then
+        # 1-hop, then 2-hop" with arbitrary order inside each layer — meaning a
+        # chunk reached only via a generic hub node (e.g. "students") ranked
+        # identically to one reached via a rare, on-topic entity (e.g. "NTU"),
+        # as long as they were in the same layer. `sorted(nodes)` below is only
+        # a deterministic tiebreak for nodes at the same score, not the ranking
+        # signal itself (see KG_ROADMAP.md's Tier 1 determinism fix).
         seen_uids: Set[str] = set()
-        results = []
-        for nodes in layers:
+        candidates: List[Tuple[float, str, Dict[str, Any]]] = []
+        for hop, nodes in enumerate(layers):
+            hop_weight = self._hop_weight(hop)
             for node in sorted(nodes):
                 if node not in self.graph:
                     continue
+                node_score = hop_weight * self._node_specificity(node)
                 for uid in self.graph.nodes[node].get("source_chunk_uids", []):
                     if uid in seen_uids:
                         continue
                     seen_uids.add(uid)
                     chunk = self.chunk_index.get(uid)
                     if chunk:
-                        results.append({
-                            "text": chunk["text"],
-                            "score": 1.0,
-                            # "payload" matches the schema Qdrant-backed retrievers use
-                            # (vector_database.py) so evaluate_retrieval() works unmodified.
-                            "payload": {
-                                "chunk_id": chunk["chunk_id"],
-                                "pdf_name": chunk["pdf_name"],
-                                "page_numbers": chunk.get("page_numbers"),
-                                "uid": uid,
-                            },
-                        })
-        return results[:top_k]
+                        candidates.append((node_score, uid, chunk))
+
+        # Sort by score descending; uid ascending as a deterministic tiebreak.
+        candidates.sort(key=lambda c: (-c[0], c[1]))
+
+        results = []
+        for score, uid, chunk in candidates[:top_k]:
+            results.append({
+                "text": chunk["text"],
+                "score": score,
+                # "payload" matches the schema Qdrant-backed retrievers use
+                # (vector_database.py) so evaluate_retrieval() works unmodified.
+                "payload": {
+                    "chunk_id": chunk["chunk_id"],
+                    "pdf_name": chunk["pdf_name"],
+                    "page_numbers": chunk.get("page_numbers"),
+                    "uid": uid,
+                },
+            })
+        return results
 
     # ------------------------------------------------------------------
     def retrieve(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:

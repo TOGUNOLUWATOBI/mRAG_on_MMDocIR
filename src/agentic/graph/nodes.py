@@ -177,6 +177,19 @@ def make_query_rewriter_node(agent_llm, retriever, query_techniques_dict, config
             ])
 
 
+            # Epic 5/7 (opt-in): disambiguate kg_multihop from query_decomposition —
+            # without this, "chaining facts across entities" and "compound wording"
+            # both sound like they could mean the same technique. query_decomposition
+            # still resolves everything itself (multiple retrievals over the SAME
+            # underlying dense+BM25 index); kg_multihop is the one that can actually
+            # look up a DIFFERENT fact once the first is resolved, via graph traversal.
+            kg_guidance = (
+                "\n- Chaining facts across 2+ distinct entities/tables/figures (must resolve "
+                "fact A elsewhere before fact B is answerable, not just compound wording) → "
+                "kg_multihop, NOT query_decomposition"
+                if "kg_multihop" in query_techniques_dict else ""
+            )
+
             # Build prompt for LLM to decide which query technique to use
             prompt = f"""You are deciding which query technique to use for information retrieval.
 
@@ -192,7 +205,7 @@ Selection Guidance:
 - Multi-part questions (with "and") → query_decomposition or query_expansion
 - Complex/abstract questions → step_back
 - Rare/niche topics → hyde or query_expansion
-- Poorly worded questions → query_rewriting
+- Poorly worded questions → query_rewriting{kg_guidance}
 
 {strategy_note}
 
