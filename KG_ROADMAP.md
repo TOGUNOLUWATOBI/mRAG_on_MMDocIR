@@ -265,3 +265,45 @@ Treat all four numbers in this table with the same n=19/single-run caveat as fin
 ### Commits
 
 Code: word-boundary/no-word-boundary ablation switch + deterministic sort (`kg_retriever.py`), `think=False` fix (`kg_builder.py`), `FORCE_TECHNIQUE` + `kg_multihop` Literal fix (`config.py`, `agentic_pipeline.py`, `agentic/graph/nodes.py`, `agentic/tools/output_parser.py`). Results: `kg_ablation_grid.json`, `agentic_kg_forced_routing_multihop.json`, `agentic_kg_routing_multihop_v2.json`.
+
+---
+
+## Epic 8 — Tier 2 follow-up: real per-chunk scoring
+
+The highest-leverage Tier 2 item from the improvement pass: give KG-retrieved chunks a real, query-relevant score instead of the hardcoded `1.0` Epic 7 documented. Directly targets the mechanism Epic 7's ablation grid diagnosed — the seed layer alone routinely supplies far more candidate chunks than `top_k` allows, with zero internal prioritization (a generic hub match like "students" ranked identically to a specific one like "NTU").
+
+**Implemented** (`KGRetriever`, `src/indexing/kg_retriever.py`):
+- `_node_specificity(node)`: `1 / (1 + log1p(evidence_count))` — rare, specific entities score higher than generic hubs.
+- `_hop_weight(hop)`: graded decay (seed=1.0, hop-1=0.5, hop-2=0.25, geometric beyond) replacing the old hard "all seed chunks outrank all hop-1 chunks" partition.
+- `_collect_chunks` now scores every candidate as `hop_weight × specificity`, sorts once, and returns real scores (previously always `1.0`).
+
+**Isolated the two factors before combining them** (repeating Epic 7's own ablation-grid lesson rather than re-bundling changes):
+
+| Config | Multi-hop (19q) NDCG@5 / MAP | Full set (150q) NDCG@5 / MAP |
+|---|---|---|
+| Epic 7 baseline (alphabetical only, no real score) | 0.026 / 0.018 | 0.226 / 0.199 |
+| Hop-decay ONLY (specificity held constant) | 0.000 / 0.000 | 0.036 / 0.026 |
+| Specificity ONLY (hop-weight held constant) | 0.158 / 0.123 | 0.162 / 0.128 |
+| **Both combined (shipped)** | **0.158 / 0.123** | **0.193 / 0.147** |
+
+**Findings:**
+1. **Specificity is doing essentially all the work; hop-decay alone is actively harmful and, combined, only adds a little back for the full set.** On the multi-hop subset, specificity-only and combined are identical to 3 decimal places — hop-1/hop-2 chunks are so rarely reached (per Epic 7's seed-layer-dilution finding) that hop-decay has nothing left to differentiate. Hop-decay alone (no specificity) actually scores *worse* than even the old alphabetical tiebreak, because without specificity all same-hop nodes tie and the only differentiator becomes a uid string sort — a different, equally-meaningless order.
+2. **Net effect is a genuine, quantified tradeoff, not a clean win.** Specificity weighting **substantially helps the multi-hop subset** (NDCG@5 +508%, MAP +583% vs. Epic 7 baseline) — the one thing a knowledge graph is actually hypothesized to help with — but **regresses the broader full-150 set on P@1 specifically** (0.14 → 0.053), while still improving NDCG@5/MAP there too. This is exactly the risk flagged when this proposal was first written: evidence count isn't a pure noise signal — sometimes the correct answer entity for an easier, non-multi-hop question really is a well-evidenced, central one (e.g. a company's own name recurring throughout its own 10-K), and down-weighting it by "rarity" can push it out of the top-1 slot even while broader ranking quality (NDCG@5/MAP) still improves.
+3. **A quick blend (specificity compressed toward neutral at α=0.25/0.5/0.75) produced identical results at all three values** — the compression wasn't aggressive enough in this range to flip any cross-hop comparison. Finding a genuinely different tradeoff point would need a real sweep at much lower α or a different formula entirely; not pursued further as disproportionate for a Tier 2 item.
+
+**Decision: shipped as the new default**, on the reasoning that (a) it's the correct, well-motivated fix for the exact mechanism diagnosed, (b) it materially improves the one axis this whole KG extension was built to test, and (c) the full-set P@1 "regression" happens entirely within a system (KG-only) already established as categorically non-competitive with Baseline (System 1) regardless of this tuning choice — it doesn't change that qualitative conclusion either way. Easily reverted via `_node_specificity`/`_hop_weight` if this call turns out wrong once more evidence comes in.
+
+**Also fixed:** the query-rewriter's "Selection Guidance" prompt block (`src/agentic/graph/nodes.py`) was stale since Epic 5 added `kg_multihop` — it never mentioned the new technique, and its "multi-part questions → query_decomposition" bullet actively pointed toward a competing technique for exactly the kind of question `kg_multihop` is meant for. Added a guidance line explicitly disambiguating the two ("must resolve fact A elsewhere before fact B is answerable, not just compound wording"). **Not yet re-benchmarked** — see below.
+
+### Blocked this pass (all downstream of the same root cause)
+
+The recurring SSL/network issue on this machine (blocks `huggingface.co`, needed for the `jina-clip-v2` embedder) came back and is blocking three things that all matter for validating today's changes and Epic 7's still-open items:
+- Re-running Agentic+KG-routing on the multi-hop subset with the new scoring fix + Selection Guidance prompt fix (needs the embedder for the dense signal).
+- Confirming the new KG scoring doesn't regress `HybridKGPipeline`'s full-150 numbers (Hybrid consumes `KGRetriever`'s candidate list as one of its three RRF signals — Epic 8's full-set P@1 dip could plausibly propagate downstream).
+- Epic 7's still-outstanding per-question rescue analysis and full-150 RRF weight sweep.
+
+Deferred rather than worked around, consistent with the earlier call on this same issue. All are cheap to run once network access is restored — no code changes needed, just re-execution.
+
+### Commits
+
+Code: `_node_specificity`/`_hop_weight`/rewritten `_collect_chunks` (`kg_retriever.py`), Selection Guidance fix (`agentic/graph/nodes.py`). Results: `kg_scoring_fix_eval.json`.
