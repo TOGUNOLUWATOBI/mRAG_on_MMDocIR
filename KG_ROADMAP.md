@@ -307,3 +307,60 @@ Deferred rather than worked around, consistent with the earlier call on this sam
 ### Commits
 
 Code: `_node_specificity`/`_hop_weight`/rewritten `_collect_chunks` (`kg_retriever.py`), Selection Guidance fix (`agentic/graph/nodes.py`). Results: `kg_scoring_fix_eval.json`.
+
+---
+
+## Epic 9 — Closing Epic 7's last open items: weight sweep + rescue analysis
+
+Network access came back, unblocking everything Epics 7–8 had deferred. This closes all of it — and delivers the single most decisive finding of the whole extension.
+
+### Re-validation: did Epic 8's KG scoring fix regress anything downstream?
+
+| | Agentic + KG routing (free choice, 19q) | Hybrid, full 150q |
+|---|---|---|
+| Before Epic 8 (scoring fix) | P@1=0.684, NDCG@5=0.717, MAP=0.711 | P@1=0.493, NDCG@5=0.630, MAP=0.591 |
+| **After Epic 8** | **P@1=0.684, NDCG@5=0.717, MAP=0.711** (identical) | **P@1=0.487, NDCG@5=0.628, MAP=0.588** (small real regression, ~1–4% relative) |
+
+Agentic is unaffected (bit-for-bit identical — the KG scoring change doesn't reach far enough into the fusion to matter once RRF only cares about rank there, and the agent's own technique mix dominates). Hybrid shows the small regression flagged as a risk in Epic 8: real but modest, consistent with the 0.3x KG weight already cushioning most of KG-only's own larger internal regression.
+
+The query-rewriter's Selection Guidance fix: re-ran free-choice routing and got `kg_multihop` selected 3/19 again, but for a **different set of 3 questions** (index 3 dropped out, index 10 newly appeared; indices 2 and 8 stayed). One run each side isn't enough to say the guidance fix changed anything, or even to isolate its effect from ordinary LLM-call variance — the run-to-run variance question Epic 7 flagged remains open.
+
+### The weight sweep, done properly this time (full 150-question set, not just the 19-question subset)
+
+Cached each of the three raw signal candidate lists (KG, dense, BM25) once per question, then re-ran only the RRF fusion math per weight — cheap, no re-retrieval needed:
+
+| `kg_weight` | P@1 | NDCG@5 | MAP |
+|---|---|---|---|
+| **0.0 (no KG at all)** | **0.580** | **0.672** | **0.647** |
+| 0.15 | 0.513 | 0.643 | 0.608 |
+| 0.3 (current default, chosen in Epic 4 from only 2 points tested on the 19q subset) | 0.487 | 0.628 | 0.588 |
+| 0.5 | 0.440 | 0.603 | 0.556 |
+| 0.7 | 0.420 | 0.583 | 0.537 |
+| 1.0 (equal weight) | 0.367 | 0.536 | 0.486 |
+
+**Monotonic decline. There is no weight at which adding the KG signal improves the full-150 aggregate — the true optimum is zero.** Epic 4's 0.3 default was tuned against the 19-question multi-hop subset only, exactly the overfitting risk flagged at the time; on the representative full set, it's already partway down a slope that only gets worse. This isn't a tuning problem to solve with a better weight — there isn't a better weight, on this metric, on this set.
+
+### The rescue analysis — the answer to the question this whole project circled around
+
+Per-question paired comparison, full 150 questions, P@1 (retrieval-only, no generation cost):
+
+| System | P@1 hits |
+|---|---|
+| Baseline alone | **95/150** |
+| Hybrid (kg_weight=0.3) | 73/150 |
+| KG-only | 8/150 |
+
+| | Rescued (Baseline misses, this system hits) | Hurt (Baseline hits, this system misses) |
+|---|---|---|
+| Hybrid vs. Baseline | **5** | **27** |
+| KG-only vs. Baseline | **2** | **89** |
+
+**This is not "a wash." Adding KG, at any tested weight or alone, breaks far more than it fixes.** The 5 questions Hybrid rescues (a housing-office email lookup, a pipeline-diagram organism question, a safety-bullet lookup, the Vietnam-vs-global iOS9 comparison, a car-models lookup) are mostly ordinary factual lookups, not cleanly explained by "multi-hop-ness" — only one (the Vietnam/iOS9 comparison) is from the hand-curated multi-hop subset. There is no natural query-type filter visible in this data that would let an adaptive-weighting scheme keep the 5 rescues while dropping the 27 (Hybrid) or 89 (KG-only) casualties — the rescues look closer to incidental luck than a systematic pattern to route toward.
+
+### Bottom line for the whole KG extension
+
+Across Epics 2–9, every angle has now been checked: naive fusion, tuned fusion, a real weight sweep across the full range, agent-mediated selective routing (both free-choice and forced), and — finally — a direct per-question accounting of exactly which questions gain and which are lost. All of them point the same direction. **On this corpus, with this implementation, knowledge-graph retrieval does not add value to an already-strong dense+BM25 pipeline — not on aggregate, not on the multi-hop subset it was built for, and not even on a lenient "does it rescue anything, anywhere" standard.** The value of this extension was never going to be "KG makes the numbers go up" — it's this: a precise, quantified, multiply-cross-checked account of exactly where and why it doesn't, with the specific mechanisms (extraction noise, blunt substring/word-boundary matching, no real scoring until Epic 8, a representational mismatch between triples and tabular questions) identified and, where cheaply fixable, fixed.
+
+### Commits
+
+Results only, no code changes this epic: `agentic_kg_routing_multihop_v3.json`, `hybrid_weighted_eval_150_v2.json`, `rrf_weight_sweep_full150.json`, `rescue_analysis_full150.json`.
