@@ -1,0 +1,2445 @@
+{
+  "llama3:8b": [
+    {
+      "uid": "2311.16502v3.pdf::232",
+      "text": "[Document: 2311.16502v3.pdf]\nFigure 38. A sample error case of Chemistry (subfield: Inorganic Chemistry). Error category: Perceptual Error, Reasoning Error Back to List of Figures | Back to Table Index Error Category: Lack of Knowledge Figure 39. A sample error case of Chemistry (subfield: Inorganic",
+      "triples": [
+        {
+          "subject": "al-Qaeda",
+          "relation": "are under the control of",
+          "object": "areas"
+        },
+        {
+          "subject": "U.S.-led military coalition",
+          "relation": "were under the control of",
+          "object": "areas"
+        },
+        {
+          "subject": "Kurdish peoples",
+          "relation": "are home to",
+          "object": "areas"
+        },
+        {
+          "subject": "proven oil reserves",
+          "relation": "are production zones of",
+          "object": "areas"
+        }
+      ]
+    },
+    {
+      "uid": "2023.acl-long.386.pdf::96",
+      "text": "[Document: 2023.acl-long.386.pdf]\ngorevich Arnold died after Georg Cantor. def program(): answer_1 = Question(\"When did Vladimir Igorevich Arnold die?\") answer_2 = Question(\"When did Georg Cantor die?\") fact_1 = Verify(f\"{answer_1} is after {answer_2}.\") label = Predict(fact_1) # The claim is that B",
+      "triples": [
+        {
+          "subject": "Vladimir Igorevich Arnold",
+          "relation": "died after",
+          "object": "Georg Cantor"
+        },
+        {
+          "subject": "Barton Mine",
+          "relation": "was halted by",
+          "object": "a natural disaster"
+        },
+        {
+          "subject": "Camlaren Mine",
+          "relation": "was not halted by",
+          "object": "a natural disaster"
+        },
+        {
+          "subject": "John O'Hara",
+          "relation": "has the nationality of",
+          "object": "some nationality"
+        },
+        {
+          "subject": "Rabindranath Tagore",
+          "relation": "has the nationality of",
+          "object": "some nationality"
+        }
+      ]
+    },
+    {
+      "uid": "ACTIVISIONBLIZZARD_2019_10K.pdf::412",
+      "text": "[Document: ACTIVISIONBLIZZARD_2019_10K.pdf]\nSoftware Development Costs and Intellectual Property Licenses",
+      "triples": [
+        {
+          "subject": "Activision Blizzard",
+          "relation": "reported",
+          "object": "software development costs"
+        },
+        {
+          "subject": "Activision Blizzard",
+          "relation": "paid",
+          "object": "intellectual property licenses"
+        }
+      ]
+    },
+    {
+      "uid": "t480_ug_en.pdf::51",
+      "text": "[Document: t480_ug_en.pdf]\nQuicker service when you call Lenovo for help Automatic notification of free software and special promotional offers To register your computer with Lenovo, go to https://support.lenovo.com/productregistration and follow the instructions on the screen. Frequently asked ques",
+      "triples": [
+        {
+          "subject": "Lenovo",
+          "relation": "provide",
+          "object": "help"
+        },
+        {
+          "subject": "Lenovo",
+          "relation": "notify",
+          "object": "free software and special promotional offers"
+        },
+        {
+          "subject": "Lenovo",
+          "relation": "require",
+          "object": "product registration"
+        },
+        {
+          "subject": "ThinkPad notebook computers",
+          "relation": "optimize the use of",
+          "object": "tips"
+        },
+        {
+          "subject": "user guide",
+          "relation": "download",
+          "object": "another language"
+        },
+        {
+          "subject": "Windows operating system",
+          "relation": "provide information about",
+          "object": "help information system"
+        },
+        {
+          "subject": "Cortana",
+          "relation": "assist with",
+          "object": "search for help, apps, files, settings"
+        }
+      ]
+    },
+    {
+      "uid": "mmdetection-readthedocs-io-en-v2.18.0.pdf::718",
+      "text": "[Document: mmdetection-readthedocs-io-en-v2.18.0.pdf]\nDefines the computation performed at every call. Should be overridden by all subclasses. Note: Although the recipe for forward pass needs to be defined within this function, one should call the Module instance afterwards instead of this since the",
+      "triples": [
+        {
+          "subject": "Module",
+          "relation": "should be overridden by",
+          "object": "all subclasses"
+        },
+        {
+          "subject": "recipe for forward pass",
+          "relation": "needs to be defined within",
+          "object": "this function"
+        },
+        {
+          "subject": "Module instance",
+          "relation": "takes care of running",
+          "object": "registered hooks"
+        },
+        {
+          "subject": "this",
+          "relation": "silently ignores",
+          "object": "them"
+        }
+      ]
+    },
+    {
+      "uid": "mmdetection-readthedocs-io-en-v2.18.0.pdf::133",
+      "text": "[Document: mmdetection-readthedocs-io-en-v2.18.0.pdf]\n(continued from previous page) lr_config = dict( policy= ' CosineAnnealing ' , warmup= ' linear ' , warmup_iters=1000, warmup_ratio=1.0 / 10, min_lr_ratio=1e-5) 12.3 Customize workflow Workflow is a list of (phase, epochs) to specify the running ",
+      "triples": [
+        {
+          "subject": "lr_config",
+          "relation": "has policy",
+          "object": "'CosineAnnealing'"
+        },
+        {
+          "subject": "lr_config",
+          "relation": "has warmup",
+          "object": "'linear'"
+        },
+        {
+          "subject": "lr_config",
+          "relation": "has warmup_iters",
+          "object": "1000"
+        },
+        {
+          "subject": "lr_config",
+          "relation": "has warmup_ratio",
+          "object": "1.0 / 10"
+        },
+        {
+          "subject": "lr_config",
+          "relation": "has min_lr_ratio",
+          "object": "1e-5"
+        },
+        {
+          "subject": "workflow",
+          "relation": "is a list of",
+          "object": "(phase, epochs)"
+        },
+        {
+          "subject": "workflow",
+          "relation": "specifies the running order and epochs",
+          "object": ""
+        },
+        {
+          "subject": "workflow",
+          "relation": "defaults to",
+          "object": "[( 'train', 1)]"
+        },
+        {
+          "subject": "workflow",
+          "relation": "can be set to",
+          "object": "[( 'train', 1), ( 'val', 1)]"
+        },
+        {
+          "subject": "model",
+          "relation": "will not have its parameters updated during",
+          "object": "val epoch"
+        },
+        {
+          "subject": "config",
+          "relation": "only controls the number of training epochs",
+          "object": ""
+        }
+      ]
+    },
+    {
+      "uid": "NIKE_2021_10K.pdf::250",
+      "text": "[Document: NIKE_2021_10K.pdf]\n| (Dollars in millions)              | FISCAL 2021   | FISCAL 2020   | %CHANGE   |    | %CHANGE EXCLUDING CURRENCY CHANGES FISCAL   | %CHANGE EXCLUDING CURRENCY CHANGES FISCAL   | 2019   | %CHANGE   |    | %CHANGE EXCLUDING CURRENCY CHANGES   | %CHANGE EXCLUDING CURRENC",
+      "triples": [
+        {
+          "subject": "Footwear",
+          "relation": "had revenues of",
+          "object": "$5,748"
+        },
+        {
+          "subject": "Footwear",
+          "relation": "had revenues of",
+          "object": "$4,635"
+        }
+      ]
+    },
+    {
+      "uid": "Macbook_air.pdf::23",
+      "text": "[Document: Macbook_air.pdf]\nWhen the 45W MagSafe Power Adapter is not connected, your MacBook Air draws power from its built-in rechargeable battery. The length of time that you can run your MacBook Air varies, depending on the applications you use and the external devices connected to your MacBook ",
+      "triples": [
+        {
+          "subject": "MacBook Air",
+          "relation": "draws power from",
+          "object": "its built-in rechargeable battery"
+        },
+        {
+          "subject": "MacBook Air",
+          "relation": "varies in length of time",
+          "object": "depending on the applications you use and the external devices connected to your MacBook Air"
+        },
+        {
+          "subject": "AirPort Extreme",
+          "relation": "can help conserve",
+          "object": "battery charge"
+        },
+        {
+          "subject": "Bluetooth wireless technology",
+          "relation": "can help conserve",
+          "object": "battery charge"
+        },
+        {
+          "subject": "power adapter",
+          "relation": "recharges the battery",
+          "object": "whether the computer is on, off, or in sleep"
+        },
+        {
+          "subject": "computer",
+          "relation": "recharges more quickly",
+          "object": "when it's off or in sleep"
+        },
+        {
+          "subject": "battery",
+          "relation": "needs charging",
+          "object": "if the light is glowing amber"
+        },
+        {
+          "subject": "battery",
+          "relation": "is fully charged",
+          "object": "if the light is glowing green"
+        }
+      ]
+    },
+    {
+      "uid": "8dfc21ec151fb9d3578fc32d5c4e5df9.pdf::1",
+      "text": "[Document: 8dfc21ec151fb9d3578fc32d5c4e5df9.pdf]\nFind out how Plan Travel's guided search experience helps you develop a data-driven, comprehensive travel strategy so that you get the most value for your travel time and budget. Click the icon at the bottom right of the video to view full screen. (05",
+      "triples": [
+        {
+          "subject": "Plan Travel",
+          "relation": "helps you develop",
+          "object": "data-driven, comprehensive travel strategy"
+        },
+        {
+          "subject": "video",
+          "relation": "has icon at the bottom right",
+          "object": "full screen"
+        },
+        {
+          "subject": "video",
+          "relation": "has icon at the bottom right",
+          "object": "full screen"
+        }
+      ]
+    },
+    {
+      "uid": "earlybird-110722143746-phpapp02_95.pdf::1",
+      "text": "[Document: earlybird-110722143746-phpapp02_95.pdf]\nomebac Inotherwords,morechecksto LPs are being'written inEurope than everbefore (Other) At the same time,real performance shows European VC driving the best exit multiples globally Exitsover$100M 2005-Q1/2011 ProportionallyEurope isproducinghigherex",
+      "triples": [
+        {
+          "subject": "omebac",
+          "relation": "being written",
+          "object": "LPs"
+        },
+        {
+          "subject": "European VC",
+          "relation": "driving",
+          "object": "best exit multiples globally"
+        },
+        {
+          "subject": "Europe",
+          "relation": "producing",
+          "object": "higher exit multiples"
+        },
+        {
+          "subject": "Europe",
+          "relation": "overcompensating for",
+          "object": "disadvantages in exit value"
+        },
+        {
+          "subject": "European VC",
+          "relation": "showing",
+          "object": "outperformance"
+        },
+        {
+          "subject": "Europe",
+          "relation": "having",
+          "object": "successful exits"
+        },
+        {
+          "subject": "US",
+          "relation": "having",
+          "object": "82% share in VcValue Contribution"
+        },
+        {
+          "subject": "Europe",
+          "relation": "having",
+          "object": "18% share in VcValue Contribution"
+        }
+      ]
+    },
+    {
+      "uid": "2005.12872v3.pdf::79",
+      "text": "[Document: 2005.12872v3.pdf]\nFig. 12: Analysis of the number of instances of various classes missed by DETR depending on how many are present in the image. We report the mean and the standard deviation. As the number of instances gets close to 100, DETR starts saturating and misses more and more obj",
+      "triples": [
+        {
+          "subject": "DETR",
+          "relation": "misses",
+          "object": "objects"
+        },
+        {
+          "subject": "DETR",
+          "relation": "saturates",
+          "object": ""
+        }
+      ]
+    },
+    {
+      "uid": "NETFLIX_2015_10K.pdf::80",
+      "text": "[Document: NETFLIX_2015_10K.pdf]\n|                | 2015    | 2015    | 2014    | 2014    |\n|----------------|---------|---------|---------|---------|\n|                | High    | Low     | High    | Low     |\n| First quarter  | $ 69.50 | $ 45.26 | $ 65.43 | $ 45.58 |\n| Second quarter | 100.89  | 58",
+      "triples": [
+        {
+          "subject": "Netflix",
+          "relation": "reported revenue of",
+          "object": "$69.50"
+        },
+        {
+          "subject": "Netflix",
+          "relation": "reported revenue of",
+          "object": "$100.89"
+        },
+        {
+          "subject": "Netflix",
+          "relation": "reported revenue of",
+          "object": "$129.29"
+        },
+        {
+          "subject": "Netflix",
+          "relation": "reported revenue of",
+          "object": "$133.27"
+        },
+        {
+          "subject": "Netflix",
+          "relation": "had as holders",
+          "object": "237"
+        },
+        {
+          "subject": "Netflix",
+          "relation": "has no present intention of paying any cash dividends",
+          "object": "in the foreseeable future"
+        }
+      ]
+    },
+    {
+      "uid": "2303.05039v2.pdf::60",
+      "text": "[Document: 2303.05039v2.pdf]\nt to provide enough useful signals to recommendations. A possible solution is to use a more fine-grained personality model than OCEAN; e.g., the MBTI personality model which has a richer, 16-facet personality profile. 7 CONCLUSION AND FUTURE WORKS",
+      "triples": [
+        {
+          "subject": "OCEAN",
+          "relation": "has",
+          "object": "personality model"
+        },
+        {
+          "subject": "MBTI",
+          "relation": "has",
+          "object": "16-facet personality profile"
+        }
+      ]
+    },
+    {
+      "uid": "PI_2017.10.04_Automation_FINAL.pdf::91",
+      "text": "[Document: PI_2017.10.04_Automation_FINAL.pdf]\nInterest in this concept varies by several demographic factors. It is higher among men than women; among whites and Hispanics than blacks; and among those who have attended or graduated from college than among those who have not. Additionally, those who",
+      "triples": [
+        {
+          "subject": "men",
+          "relation": "have interest in",
+          "object": "robot caregivers"
+        },
+        {
+          "subject": "whites and Hispanics",
+          "relation": "have interest in",
+          "object": "robot caregivers"
+        },
+        {
+          "subject": "blacks",
+          "relation": "have interest in",
+          "object": "robot caregivers"
+        },
+        {
+          "subject": "those who have attended or graduated from college",
+          "relation": "have interest in",
+          "object": "robot caregivers"
+        },
+        {
+          "subject": "those who are generally more familiar with the concept of robot caregivers",
+          "relation": "express interest in using one",
+          "object": "robot caregivers"
+        },
+        {
+          "subject": "those who have heard a lot about this concept",
+          "relation": "say they would be interested in having one for themselves or a family member",
+          "object": "robot caregivers"
+        },
+        {
+          "subject": "those who have heard only a little about this concept",
+          "relation": "say they would be interested in having one for themselves or a family member",
+          "object": "robot caregivers"
+        },
+        {
+          "subject": "those who have heard nothing about it",
+          "relation": "say they would be interested in having one for themselves or a family member",
+          "object": "robot caregivers"
+        }
+      ]
+    },
+    {
+      "uid": "2021-Apple-Catalog.pdf::6",
+      "text": "[Document: 2021-Apple-Catalog.pdf]\nDelivering an inviting and meaningful customer experience even in a high security environment. Enabling you to engage customers with high value accessory cross-merchandising. ONE PLATFORM One common platform that allows you to control where and how much security is",
+      "triples": [
+        {
+          "subject": "Apple",
+          "relation": "delivers",
+          "object": "customer experience"
+        },
+        {
+          "subject": "ONE PLATFORM",
+          "relation": "allows",
+          "object": "control of security"
+        },
+        {
+          "subject": "Series 960 POD",
+          "relation": "features",
+          "object": "optimal combination of design and consumer experience"
+        },
+        {
+          "subject": "Series 960 POD",
+          "relation": "provides",
+          "object": "critical user data and analytics"
+        },
+        {
+          "subject": "iPhone 13 Pro One60 Tethered",
+          "relation": "has",
+          "object": "industry leading mechanical security with power and alarm"
+        },
+        {
+          "subject": "iPhone 13 Pro One60 Tethered",
+          "relation": "has",
+          "object": "4-way unibody steel security arms"
+        }
+      ]
+    },
+    {
+      "uid": "ACTIVISIONBLIZZARD_2019_10K.pdf::242",
+      "text": "[Document: ACTIVISIONBLIZZARD_2019_10K.pdf]\n|                                 | For the Years Ended December 31,   | For the Years Ended December 31,   | For the Years Ended December 31,   | For the Years Ended December 31,   |\n|---------------------------------|------------------------------------|",
+      "triples": [
+        {
+          "subject": "Console",
+          "relation": "reported revenue of",
+          "object": "$ 1,920"
+        },
+        {
+          "subject": "PC",
+          "relation": "reported revenue of",
+          "object": "1,718"
+        },
+        {
+          "subject": "Console",
+          "relation": "decreased by",
+          "object": "$ (618)"
+        },
+        {
+          "subject": "Console",
+          "relation": "%Change",
+          "object": "(24)%"
+        }
+      ]
+    },
+    {
+      "uid": "ACTIVISIONBLIZZARD_2019_10K.pdf::770",
+      "text": "[Document: ACTIVISIONBLIZZARD_2019_10K.pdf]\nCapitalized terms used but not defined herein shall have the meanings given to such terms in the Plan or the Award Terms, as the case may be. TERMS AND CONDITIONS This Appendix includes special terms and conditions applicable to Holders who work and/or res",
+      "triples": [
+        {
+          "subject": "Capitalized terms",
+          "relation": "shall have the meanings given to",
+          "object": "such terms in the Plan or the Award Terms"
+        },
+        {
+          "subject": "Holders",
+          "relation": "work and/or reside in",
+          "object": "the countries covered by the Appendix"
+        },
+        {
+          "subject": "Terms and conditions",
+          "relation": "are in addition to or, if so indicated, in place of",
+          "object": "the terms and conditions set forth in the Award Terms"
+        },
+        {
+          "subject": "Company",
+          "relation": "shall have the sole discretion to determine",
+          "object": "to what extent the special terms and conditions shall apply to the Holder"
+        }
+      ]
+    },
+    {
+      "uid": "2309.17421v2.pdf::36",
+      "text": "[Document: 2309.17421v2.pdf]\n can process, thereby imposing limitations on the model's capability and genericity.",
+      "triples": [
+        {
+          "subject": "Document",
+          "relation": "have",
+          "object": "capabilities"
+        },
+        {
+          "subject": "model",
+          "relation": "impose",
+          "object": "limitations"
+        }
+      ]
+    },
+    {
+      "uid": "ACTIVISIONBLIZZARD_2019_10K.pdf::902",
+      "text": "[Document: ACTIVISIONBLIZZARD_2019_10K.pdf]\n(d)        Confidentiality.  You  acknowledge,  and  the  Employer  agrees,  that  during  your  employment  you  will  have  access  to  and become informed of confidential and proprietary information concerning the Activision Blizzard Group. During your ",
+      "triples": [
+        {
+          "subject": "You",
+          "relation": "acknowledge",
+          "object": ""
+        },
+        {
+          "subject": "Employer",
+          "relation": "agrees",
+          "object": ""
+        },
+        {
+          "subject": "Activision Blizzard Group",
+          "relation": "have access to",
+          "object": "confidential and proprietary information"
+        },
+        {
+          "subject": "You",
+          "relation": "become informed of",
+          "object": "confidential and proprietary information concerning the Activision Blizzard Group"
+        },
+        {
+          "subject": "Activision Blizzard Group",
+          "relation": "shall not be used by",
+          "object": "you or disclosed or made available by you to any person"
+        },
+        {
+          "subject": "You",
+          "relation": "use",
+          "object": "confidential or proprietary information of any entity in the Activision Blizzard Group"
+        },
+        {
+          "subject": "You",
+          "relation": "disclose or make available",
+          "object": "confidential or proprietary information of any entity in the Activision Blizzard Group to any person"
+        },
+        {
+          "subject": "Activision Blizzard Group",
+          "relation": "request",
+          "object": "you shall return all such information that exists, whether in electronic, written, or other form (and all copies or extracts thereof)"
+        }
+      ]
+    },
+    {
+      "uid": "User_Manual_1500S_Classic_EN.pdf::75",
+      "text": "[Document: User_Manual_1500S_Classic_EN.pdf]\nEnsure correct orientation of discharge. \u273b Refill and replace powder hopper \u273b Use the multitool to rotate the lock clockwise to\u00a0close it Portion controller with individual parts. Dosing auger iMportant 7 HaCCp cleaning schedule You are required by law to ",
+      "triples": [
+        {
+          "subject": "customers",
+          "relation": "are not subject to",
+          "object": "any health hazards"
+        },
+        {
+          "subject": "food items",
+          "relation": "consequence of the consumption of",
+          "object": "health hazards"
+        },
+        {
+          "subject": "HACCP cleaning schedule",
+          "relation": "is required for",
+          "object": "risk identification and assessment"
+        },
+        {
+          "subject": "risk analysis",
+          "relation": "must be carried out on",
+          "object": "premises"
+        }
+      ]
+    },
+    {
+      "uid": "PRE_2022.09.29_NSL-politics_REPORT.pdf::3",
+      "text": "[Document: PRE_2022.09.29_NSL-politics_REPORT.pdf]\nTo further ensure the survey reflects a balanced crosssection of the nation's Hispanic adults, th e data is weighted to match the U.S. Hispanic adult population by age, gender, education, nativity, Hispanic origin group and other categories. Read mo",
+      "triples": []
+    },
+    {
+      "uid": "NIKE_2021_10K.pdf::412",
+      "text": "[Document: NIKE_2021_10K.pdf]\ns not recoverable, the Company will estimate the fair value of the asset group using appropriate valuation methodologies, which would typically include an estimate of discounted cash flows. Any impairment would be measured as the difference between the asset group's car",
+      "triples": [
+        {
+          "subject": "Company",
+          "relation": "will estimate the fair value of",
+          "object": "asset group"
+        },
+        {
+          "subject": "asset group",
+          "relation": "would typically include an estimate of",
+          "object": "discounted cash flows"
+        },
+        {
+          "subject": "Company",
+          "relation": "performs annual impairment tests on",
+          "object": "goodwill and intangible assets with indefinite lives"
+        },
+        {
+          "subject": "Company",
+          "relation": "measures as the difference between",
+          "object": "asset group's carrying amount and its estimated fair value"
+        },
+        {
+          "subject": "Company",
+          "relation": "performs annual impairment tests on",
+          "object": "reporting unit or an intangible asset with an indefinite life"
+        },
+        {
+          "subject": "events or changes in circumstances",
+          "relation": "may trigger interim impairment reviews include",
+          "object": "significant changes in business climate, operating results, planned investments in the reporting unit, planned divestitures or an expectation that the carrying amount may not be recoverable"
+        }
+      ]
+    },
+    {
+      "uid": "mmdetection-readthedocs-io-en-v2.18.0.pdf::91",
+      "text": "[Document: mmdetection-readthedocs-io-en-v2.18.0.pdf]\nThe annotation json files in COCO format has the following necessary keys: ' images ' : [ { ' file_name ' : ' COCO_val2014_000000001268.jpg ' , ' height ' : 427, ' width ' : 640, ' id ' : 1268 }, ... ], ' annotations ' : [ { ' segmentation ' : [[",
+      "triples": [
+        {
+          "subject": "COCO",
+          "relation": "has keys",
+          "object": "'images', 'annotations', 'categories'"
+        },
+        {
+          "subject": "images",
+          "relation": "contains",
+          "object": "list of images"
+        },
+        {
+          "subject": "images",
+          "relation": "includes information like",
+          "object": "'file_name', 'height', 'width', and 'id'"
+        },
+        {
+          "subject": "annotations",
+          "relation": "contains",
+          "object": "list of instance annotations"
+        },
+        {
+          "subject": "categories",
+          "relation": "contains",
+          "object": "list of categories names and their ID"
+        }
+      ]
+    },
+    {
+      "uid": "PS_2018.01.09_STEM_FINAL.pdf::198",
+      "text": "[Document: PS_2018.01.09_STEM_FINAL.pdf]\n|                                                           | Blacks in STEM jobs   | Blacks in STEM jobs   | Blacks in STEM jobs   |\n|-----------------------------------------------------------|-----------------------|-----------------------|----------------",
+      "triples": [
+        {
+          "subject": "Blacks in STEM jobs",
+          "relation": "experienced any type of racial/ethnic discrimination",
+          "object": "62%"
+        },
+        {
+          "subject": "Blacks in STEM jobs",
+          "relation": "Were treated as if they were not competent",
+          "object": "45"
+        },
+        {
+          "subject": "Blacks in STEM jobs",
+          "relation": "Felt isolated in their workplace",
+          "object": "29"
+        },
+        {
+          "subject": "Blacks in STEM jobs",
+          "relation": "Earned less than a coworker doing the same job",
+          "object": "27"
+        },
+        {
+          "subject": "Blacks in STEM jobs",
+          "relation": "Received less support from senior leaders than a coworker",
+          "object": "27"
+        }
+      ]
+    },
+    {
+      "uid": "2303.08559v2.pdf::128",
+      "text": "[Document: 2303.08559v2.pdf]\n | Event Detection            | Event Detection            | Event Detection                                                                                                                                                                                                   ",
+      "triples": [
+        {
+          "subject": "we",
+          "relation": "have fought",
+          "object": "every institution"
+        },
+        {
+          "subject": "we",
+          "relation": "have fought",
+          "object": "every law firm"
+        }
+      ]
+    },
+    {
+      "uid": "mmdetection-readthedocs-io-en-v2.18.0.pdf::730",
+      "text": "[Document: mmdetection-readthedocs-io-en-v2.18.0.pdf]\nloss ( cls_score , bbox_pred , labels , label_weights , bbox_targets , bbox_weights , imgs_whwh=None , reduction_override=None , **kwargs ) 'Loss function of DIIHead, get loss of all images. Parameters cls_score ( Tensor ) - Classification predic",
+      "triples": [
+        {
+          "subject": "DIIHead",
+          "relation": "has loss function of",
+          "object": "loss"
+        },
+        {
+          "subject": "cls_score",
+          "relation": "has shape",
+          "object": "(batch_size * num_proposals_single_image, num_classes)"
+        },
+        {
+          "subject": "bbox_pred",
+          "relation": "has shape",
+          "object": "(batch_size * num_proposals_single_image, 4)"
+        },
+        {
+          "subject": "labels",
+          "relation": "has shape",
+          "object": "(batch_size * num_proposals_single_image"
+        },
+        {
+          "subject": "label_weights",
+          "relation": "has shape",
+          "object": "(batch_size * num_proposals_single_image"
+        },
+        {
+          "subject": "bbox_targets",
+          "relation": "has shape",
+          "object": "(batch_size * num_proposals_single_image, 4)"
+        }
+      ]
+    },
+    {
+      "uid": "efd88e41c5f2606c57929cac6c1c0605.pdf::47",
+      "text": "[Document: efd88e41c5f2606c57929cac6c1c0605.pdf]\nMichael Kuperberg , Executive Director, USGCRP, White House OSTP Ben DeAngelo , Deputy Executive Director, USGCRP, White House OSTP Katharine Jacobs , Director, National Climate Assessment, White House OSTP (through December 2013) Thomas Armstrong , E",
+      "triples": [
+        {
+          "subject": "Michael Kuperberg",
+          "relation": "Executive Director of",
+          "object": "USGCRP"
+        },
+        {
+          "subject": "Ben DeAngelo",
+          "relation": "Deputy Executive Director of",
+          "object": "USGCRP"
+        },
+        {
+          "subject": "Katharine Jacobs",
+          "relation": "Director of",
+          "object": "National Climate Assessment"
+        },
+        {
+          "subject": "Thomas Armstrong",
+          "relation": "Executive Director of",
+          "object": "USGCRP NCO"
+        },
+        {
+          "subject": "Christopher P. Weaver",
+          "relation": "Executive Director (Acting) of",
+          "object": "USGCRP"
+        },
+        {
+          "subject": "Glynis C. Lough",
+          "relation": "Chief of Staff to",
+          "object": "National Climate Assessment"
+        },
+        {
+          "subject": "Bradley Akamine",
+          "relation": "Chief Digital Officer of",
+          "object": "White House OSTP"
+        },
+        {
+          "subject": "Mark M. Shimamoto",
+          "relation": "Health Program Lead of",
+          "object": "White House OSTP"
+        },
+        {
+          "subject": "Ilya Fischhoff",
+          "relation": "Senior Scientist at",
+          "object": "National Climate Assessment"
+        },
+        {
+          "subject": "Emily Therese Cloyd",
+          "relation": "Engagement and Outreach Lead for",
+          "object": "National Climate Assessment"
+        },
+        {
+          "subject": "Steve Aulenbach",
+          "relation": "GCIS Content Curator of",
+          "object": "White House OSTP"
+        },
+        {
+          "subject": "Samantha Brooks",
+          "relation": "SGCR Executive Secretary of",
+          "object": "White House OSTP"
+        },
+        {
+          "subject": "Tess Carter",
+          "relation": "Student Assistant at",
+          "object": "National Climate Assessment"
+        },
+        {
+          "subject": "Brian Duggan",
+          "relation": "GCIS Lead System Engineer of",
+          "object": "White House OSTP"
+        }
+      ]
+    },
+    {
+      "uid": "earlybird-110722143746-phpapp02_95.pdf::7",
+      "text": "[Document: earlybird-110722143746-phpapp02_95.pdf]\nThese market changes have led to significant european advantages in entry valuations,capital efficiency and hitrate $388M BenchmarkingofVc PerformanceDrivers, Europe vs.USA, 2004-2011ytd $79M $5.5M AverageEntry Valuation*\" 100% USA $16.1M Europe S44",
+      "triples": [
+        {
+          "subject": "European VC Funds",
+          "relation": "have",
+          "object": "highly limited visibility"
+        },
+        {
+          "subject": "published industry fund statistics in Europe",
+          "relation": "are",
+          "object": "poor quality"
+        },
+        {
+          "subject": "data set in europe",
+          "relation": "is",
+          "object": "very small"
+        },
+        {
+          "subject": "funds in database",
+          "relation": "representing",
+          "object": "only 15% of the industry"
+        }
+      ]
+    },
+    {
+      "uid": "obs-productdesc-en.pdf::154",
+      "text": "[Document: obs-productdesc-en.pdf]\nSelect a region close to you or your target users. This reduces network latency and improves access speed. However, Chinese mainland regions provide the same infrastructure, BGP network quality, as well as resource operations and configurations. If you or your targ",
+      "triples": [
+        {
+          "subject": "Chinese mainland",
+          "relation": "provide",
+          "object": "infrastructure"
+        },
+        {
+          "subject": "Chinese mainland",
+          "relation": "provide",
+          "object": "BGP network quality"
+        },
+        {
+          "subject": "Chinese mainland",
+          "relation": "provide",
+          "object": "resource operations and configurations"
+        },
+        {
+          "subject": "Asia Pacific region",
+          "relation": "exclude",
+          "object": "Chinese mainland"
+        },
+        {
+          "subject": "AP-Bangkok",
+          "relation": "select",
+          "object": "region"
+        },
+        {
+          "subject": "AP-Singapore",
+          "relation": "select",
+          "object": "region"
+        },
+        {
+          "subject": "AF-Johannesburg",
+          "relation": "select",
+          "object": "region"
+        },
+        {
+          "subject": "EU-Paris",
+          "relation": "select",
+          "object": "region"
+        }
+      ]
+    },
+    {
+      "uid": "mmdetection-readthedocs-io-en-v2.18.0.pdf::179",
+      "text": "[Document: mmdetection-readthedocs-io-en-v2.18.0.pdf]\nExamples: Assuming that you have already downloaded the Faster R-CNN model checkpoint to the directory checkpoints/ . python -m torch.distributed.launch --nproc_per_node=1 --master_port=29500 tools/analysis_ \u02d3 \u2192 tools/benchmark.py \\ configs/faste",
+      "triples": [
+        {
+          "subject": "Faster R-CNN",
+          "relation": "downloaded",
+          "object": "checkpoints/"
+        },
+        {
+          "subject": "torch.distributed.launch",
+          "relation": "launched",
+          "object": "tools/analysis_"
+        }
+      ]
+    }
+  ],
+  "qwen3:32b": [
+    {
+      "uid": "2311.16502v3.pdf::232",
+      "text": "[Document: 2311.16502v3.pdf]\nFigure 38. A sample error case of Chemistry (subfield: Inorganic Chemistry). Error category: Perceptual Error, Reasoning Error Back to List of Figures | Back to Table Index Error Category: Lack of Knowledge Figure 39. A sample error case of Chemistry (subfield: Inorganic",
+      "triples": [
+        {
+          "subject": "Figure 38",
+          "relation": "is a sample error case of",
+          "object": "Chemistry"
+        },
+        {
+          "subject": "Figure 38",
+          "relation": "has subfield",
+          "object": "Inorganic Chemistry"
+        },
+        {
+          "subject": "Figure 38",
+          "relation": "has error category",
+          "object": "Perceptual Error"
+        },
+        {
+          "subject": "Figure 38",
+          "relation": "has error category",
+          "object": "Reasoning Error"
+        },
+        {
+          "subject": "Figure 39",
+          "relation": "is a sample error case of",
+          "object": "Chemistry"
+        },
+        {
+          "subject": "Figure 39",
+          "relation": "has subfield",
+          "object": "Inorganic Chemistry"
+        },
+        {
+          "subject": "Figure 39",
+          "relation": "has error category",
+          "object": "Lack of Knowledge"
+        },
+        {
+          "subject": "Question",
+          "relation": "is in field of",
+          "object": "Geography"
+        },
+        {
+          "subject": "Question",
+          "relation": "has subfield",
+          "object": "Human Geography"
+        },
+        {
+          "subject": "Question",
+          "relation": "refers to",
+          "object": "<image 1>"
+        },
+        {
+          "subject": "Option A",
+          "relation": "describes areas",
+          "object": "under the control of al-Qaeda from 2001 to present"
+        },
+        {
+          "subject": "Option B",
+          "relation": "describes areas",
+          "object": "under the control of the U.S.-led military coalition as of 2003"
+        },
+        {
+          "subject": "Option C",
+          "relation": "describes areas",
+          "object": "home to the Kurdish peoples"
+        },
+        {
+          "subject": "Option D",
+          "relation": "describes areas",
+          "object": "production zones of proven oil reserves"
+        },
+        {
+          "subject": "Option E",
+          "relation": "describes areas",
+          "object": "with large-scale irrigated agriculture"
+        }
+      ]
+    },
+    {
+      "uid": "2023.acl-long.386.pdf::96",
+      "text": "[Document: 2023.acl-long.386.pdf]\ngorevich Arnold died after Georg Cantor. def program(): answer_1 = Question(\"When did Vladimir Igorevich Arnold die?\") answer_2 = Question(\"When did Georg Cantor die?\") fact_1 = Verify(f\"{answer_1} is after {answer_2}.\") label = Predict(fact_1) # The claim is that B",
+      "triples": [
+        {
+          "subject": "gorevich Arnold",
+          "relation": "died after",
+          "object": "Georg Cantor"
+        },
+        {
+          "subject": "Barton Mine",
+          "relation": "was halted by",
+          "object": "a natural disaster"
+        },
+        {
+          "subject": "Camlaren Mine",
+          "relation": "was not halted by",
+          "object": "a natural disaster"
+        },
+        {
+          "subject": "John O'Hara",
+          "relation": "has nationality different from",
+          "object": "Rabindranath Tagore"
+        }
+      ]
+    },
+    {
+      "uid": "ACTIVISIONBLIZZARD_2019_10K.pdf::412",
+      "text": "[Document: ACTIVISIONBLIZZARD_2019_10K.pdf]\nSoftware Development Costs and Intellectual Property Licenses",
+      "triples": []
+    },
+    {
+      "uid": "t480_ug_en.pdf::51",
+      "text": "[Document: t480_ug_en.pdf]\nQuicker service when you call Lenovo for help Automatic notification of free software and special promotional offers To register your computer with Lenovo, go to https://support.lenovo.com/productregistration and follow the instructions on the screen. Frequently asked ques",
+      "triples": [
+        {
+          "subject": "Lenovo",
+          "relation": "provides",
+          "object": "quicker service"
+        },
+        {
+          "subject": "Lenovo",
+          "relation": "offers",
+          "object": "automatic notification of free software and special promotional offers"
+        },
+        {
+          "subject": "User",
+          "relation": "can register",
+          "object": "computer with Lenovo"
+        },
+        {
+          "subject": "User",
+          "relation": "can download",
+          "object": "user guide in another language"
+        },
+        {
+          "subject": "Windows help information system",
+          "relation": "provides",
+          "object": "detailed information about using the Windows operating system"
+        },
+        {
+          "subject": "User",
+          "relation": "can access",
+          "object": "Windows help information system"
+        },
+        {
+          "subject": "User",
+          "relation": "can use",
+          "object": "Cortana personal assistant"
+        }
+      ]
+    },
+    {
+      "uid": "mmdetection-readthedocs-io-en-v2.18.0.pdf::718",
+      "text": "[Document: mmdetection-readthedocs-io-en-v2.18.0.pdf]\nDefines the computation performed at every call. Should be overridden by all subclasses. Note: Although the recipe for forward pass needs to be defined within this function, one should call the Module instance afterwards instead of this since the",
+      "triples": []
+    },
+    {
+      "uid": "mmdetection-readthedocs-io-en-v2.18.0.pdf::133",
+      "text": "[Document: mmdetection-readthedocs-io-en-v2.18.0.pdf]\n(continued from previous page) lr_config = dict( policy= ' CosineAnnealing ' , warmup= ' linear ' , warmup_iters=1000, warmup_ratio=1.0 / 10, min_lr_ratio=1e-5) 12.3 Customize workflow Workflow is a list of (phase, epochs) to specify the running ",
+      "triples": [
+        {
+          "subject": "lr_config",
+          "relation": "has policy",
+          "object": "CosineAnnealing"
+        },
+        {
+          "subject": "lr_config",
+          "relation": "has warmup",
+          "object": "linear"
+        },
+        {
+          "subject": "lr_config",
+          "relation": "has warmup iters",
+          "object": "1000"
+        },
+        {
+          "subject": "lr_config",
+          "relation": "has warmup ratio",
+          "object": "1.0 / 10"
+        },
+        {
+          "subject": "lr_config",
+          "relation": "has min lr ratio",
+          "object": "1e-5"
+        },
+        {
+          "subject": "workflow",
+          "relation": "is a list of",
+          "object": "(phase, epochs)"
+        },
+        {
+          "subject": "workflow",
+          "relation": "is set to",
+          "object": "[( ' train ' , 1)]"
+        },
+        {
+          "subject": "workflow",
+          "relation": "can be set to",
+          "object": "[( ' train ' , 1), ( ' val ' , 1)]"
+        },
+        {
+          "subject": "workflow",
+          "relation": "runs",
+          "object": "training epoch"
+        },
+        {
+          "subject": "workflow",
+          "relation": "runs",
+          "object": "validation epoch"
+        },
+        {
+          "subject": "validation epoch",
+          "relation": "does not update",
+          "object": "model parameters"
+        },
+        {
+          "subject": "total_epochs",
+          "relation": "controls",
+          "object": "number of training epochs"
+        },
+        {
+          "subject": "total_epochs",
+          "relation": "does not affect",
+          "object": "validation workflow"
+        }
+      ]
+    },
+    {
+      "uid": "NIKE_2021_10K.pdf::250",
+      "text": "[Document: NIKE_2021_10K.pdf]\n| (Dollars in millions)              | FISCAL 2021   | FISCAL 2020   | %CHANGE   |    | %CHANGE EXCLUDING CURRENCY CHANGES FISCAL   | %CHANGE EXCLUDING CURRENCY CHANGES FISCAL   | 2019   | %CHANGE   |    | %CHANGE EXCLUDING CURRENCY CHANGES   | %CHANGE EXCLUDING CURRENC",
+      "triples": [
+        {
+          "subject": "Nike",
+          "relation": "reported footwear revenue of",
+          "object": "$5,748 million"
+        },
+        {
+          "subject": "Nike",
+          "relation": "reported footwear revenue in fiscal 2020 of",
+          "object": "$4,635 million"
+        },
+        {
+          "subject": "Nike footwear revenue",
+          "relation": "increased by",
+          "object": "24% in fiscal 2021"
+        },
+        {
+          "subject": "Nike footwear revenue",
+          "relation": "increased by",
+          "object": "19% in fiscal 2021 excluding currency changes"
+        }
+      ]
+    },
+    {
+      "uid": "Macbook_air.pdf::23",
+      "text": "[Document: Macbook_air.pdf]\nWhen the 45W MagSafe Power Adapter is not connected, your MacBook Air draws power from its built-in rechargeable battery. The length of time that you can run your MacBook Air varies, depending on the applications you use and the external devices connected to your MacBook ",
+      "triples": [
+        {
+          "subject": "MacBook Air",
+          "relation": "draws power from",
+          "object": "built-in rechargeable battery"
+        },
+        {
+          "subject": "MacBook Air",
+          "relation": "has power source",
+          "object": "45W MagSafe Power Adapter"
+        },
+        {
+          "subject": "MacBook Air",
+          "relation": "has feature",
+          "object": "AirPort Extreme"
+        },
+        {
+          "subject": "MacBook Air",
+          "relation": "has feature",
+          "object": "Bluetooth wireless technology"
+        },
+        {
+          "subject": "MacBook Air",
+          "relation": "can be recharged with",
+          "object": "power adapter"
+        },
+        {
+          "subject": "MacBook Air",
+          "relation": "has indicator light",
+          "object": "MagSafe connector"
+        },
+        {
+          "subject": "MagSafe connector",
+          "relation": "has indicator light",
+          "object": "amber"
+        },
+        {
+          "subject": "MagSafe connector",
+          "relation": "has indicator light",
+          "object": "green"
+        },
+        {
+          "subject": "Battery",
+          "relation": "needs charging when indicator light is",
+          "object": "amber"
+        },
+        {
+          "subject": "Battery",
+          "relation": "is fully charged when indicator light is",
+          "object": "green"
+        },
+        {
+          "subject": "Battery",
+          "relation": "recharges more quickly when computer is",
+          "object": "off or in sleep"
+        },
+        {
+          "subject": "Battery",
+          "relation": "recharges when power adapter is",
+          "object": "connected"
+        }
+      ]
+    },
+    {
+      "uid": "8dfc21ec151fb9d3578fc32d5c4e5df9.pdf::1",
+      "text": "[Document: 8dfc21ec151fb9d3578fc32d5c4e5df9.pdf]\nFind out how Plan Travel's guided search experience helps you develop a data-driven, comprehensive travel strategy so that you get the most value for your travel time and budget. Click the icon at the bottom right of the video to view full screen. (05",
+      "triples": [
+        {
+          "subject": "Plan Travel",
+          "relation": "has",
+          "object": "guided search experience"
+        },
+        {
+          "subject": "guided search experience",
+          "relation": "helps",
+          "object": "develop data-driven, comprehensive travel strategy"
+        },
+        {
+          "subject": "data-driven, comprehensive travel strategy",
+          "relation": "provides",
+          "object": "most value for travel time and budget"
+        },
+        {
+          "subject": "video",
+          "relation": "has instruction to click icon at bottom right to",
+          "object": "view full screen"
+        },
+        {
+          "subject": "high school and student attributes",
+          "relation": "align with",
+          "object": "institution's goals and strategies"
+        },
+        {
+          "subject": "Segment Analysis Service",
+          "relation": "requires",
+          "object": "file preparation for historical or periodic tagging"
+        },
+        {
+          "subject": "video",
+          "relation": "has instruction to click icon at bottom right to",
+          "object": "view full screen"
+        },
+        {
+          "subject": "Middle States Region",
+          "relation": "includes",
+          "object": "Major Metropolitan Area"
+        }
+      ]
+    },
+    {
+      "uid": "earlybird-110722143746-phpapp02_95.pdf::1",
+      "text": "[Document: earlybird-110722143746-phpapp02_95.pdf]\nomebac Inotherwords,morechecksto LPs are being'written inEurope than everbefore (Other) At the same time,real performance shows European VC driving the best exit multiples globally Exitsover$100M 2005-Q1/2011 ProportionallyEurope isproducinghigherex",
+      "triples": [
+        {
+          "subject": "Europe",
+          "relation": "producing",
+          "object": "higher exit multiples"
+        },
+        {
+          "subject": "Europe",
+          "relation": "has",
+          "object": "lower entry valuations"
+        },
+        {
+          "subject": "Europe",
+          "relation": "has",
+          "object": "higher capital efficiency"
+        },
+        {
+          "subject": "Europe",
+          "relation": "has",
+          "object": "average exit values ca. 25% smaller"
+        },
+        {
+          "subject": "Exitsover$100M 2005-Q1/2011",
+          "relation": "has number",
+          "object": "131"
+        },
+        {
+          "subject": "Exitsover$100M 2005-Q1/2011",
+          "relation": "has median exit valuation",
+          "object": "$173M"
+        },
+        {
+          "subject": "Exitsover$100M 2005-Q1/2011",
+          "relation": "has % with multiple of cash \u22655",
+          "object": "57.26%"
+        },
+        {
+          "subject": "Other",
+          "relation": "has number",
+          "object": "596"
+        },
+        {
+          "subject": "Other",
+          "relation": "has median exit valuation",
+          "object": "$236M"
+        },
+        {
+          "subject": "Other",
+          "relation": "has % with multiple of cash \u22655",
+          "object": "47.27%"
+        },
+        {
+          "subject": "Europe",
+          "relation": "has outperformance based on",
+          "object": "overproportional share in successful exits"
+        },
+        {
+          "subject": "Europe",
+          "relation": "has share in VC value contribution since 2004",
+          "object": "18%"
+        },
+        {
+          "subject": "USA",
+          "relation": "has share in VC value contribution since 2004",
+          "object": "82%"
+        },
+        {
+          "subject": "Europe",
+          "relation": "has total capital invested",
+          "object": "22%"
+        },
+        {
+          "subject": "USA",
+          "relation": "has total capital invested",
+          "object": "78%"
+        },
+        {
+          "subject": "Europe",
+          "relation": "has % cap s.mested",
+          "object": "36%"
+        },
+        {
+          "subject": "USA",
+          "relation": "has % cap s.mested",
+          "object": "64%"
+        },
+        {
+          "subject": "Europe",
+          "relation": "has total no.",
+          "object": "41%"
+        },
+        {
+          "subject": "USA",
+          "relation": "has total no.",
+          "object": "59%"
+        },
+        {
+          "subject": "Europe",
+          "relation": "has higher share of VC funds with top US quartile performance",
+          "object": "due in part to"
+        }
+      ]
+    },
+    {
+      "uid": "2005.12872v3.pdf::79",
+      "text": "[Document: 2005.12872v3.pdf]\nFig. 12: Analysis of the number of instances of various classes missed by DETR depending on how many are present in the image. We report the mean and the standard deviation. As the number of instances gets close to 100, DETR starts saturating and misses more and more obj",
+      "triples": [
+        {
+          "subject": "DETR",
+          "relation": "starts saturating",
+          "object": "as the number of instances gets close to 100"
+        },
+        {
+          "subject": "DETR",
+          "relation": "misses more and more objects",
+          "object": "as the number of instances gets close to 100"
+        },
+        {
+          "subject": "Fig. 12",
+          "relation": "shows analysis of",
+          "object": "the number of instances of various classes missed by DETR"
+        },
+        {
+          "subject": "Fig. 12",
+          "relation": "reports",
+          "object": "mean and standard deviation"
+        }
+      ]
+    },
+    {
+      "uid": "NETFLIX_2015_10K.pdf::80",
+      "text": "[Document: NETFLIX_2015_10K.pdf]\n|                | 2015    | 2015    | 2014    | 2014    |\n|----------------|---------|---------|---------|---------|\n|                | High    | Low     | High    | Low     |\n| First quarter  | $ 69.50 | $ 45.26 | $ 65.43 | $ 45.58 |\n| Second quarter | 100.89  | 58",
+      "triples": [
+        {
+          "subject": "Netflix",
+          "relation": "had stockholders of record as of",
+          "object": "January 27, 2016"
+        },
+        {
+          "subject": "Netflix",
+          "relation": "had number of stockholders of record",
+          "object": "237"
+        },
+        {
+          "subject": "Netflix",
+          "relation": "has declared cash dividends",
+          "object": "none"
+        },
+        {
+          "subject": "Netflix",
+          "relation": "has paid cash dividends",
+          "object": "none"
+        },
+        {
+          "subject": "Netflix",
+          "relation": "has intention to pay cash dividends in foreseeable future",
+          "object": "none"
+        }
+      ]
+    },
+    {
+      "uid": "2303.05039v2.pdf::60",
+      "text": "[Document: 2303.05039v2.pdf]\nt to provide enough useful signals to recommendations. A possible solution is to use a more fine-grained personality model than OCEAN; e.g., the MBTI personality model which has a richer, 16-facet personality profile. 7 CONCLUSION AND FUTURE WORKS",
+      "triples": []
+    },
+    {
+      "uid": "PI_2017.10.04_Automation_FINAL.pdf::91",
+      "text": "[Document: PI_2017.10.04_Automation_FINAL.pdf]\nInterest in this concept varies by several demographic factors. It is higher among men than women; among whites and Hispanics than blacks; and among those who have attended or graduated from college than among those who have not. Additionally, those who",
+      "triples": [
+        {
+          "subject": "Interest in robot caregivers",
+          "relation": "is higher among",
+          "object": "men"
+        },
+        {
+          "subject": "Interest in robot caregivers",
+          "relation": "is higher among",
+          "object": "whites and Hispanics"
+        },
+        {
+          "subject": "Interest in robot caregivers",
+          "relation": "is higher among",
+          "object": "those who have attended or graduated from college"
+        },
+        {
+          "subject": "Interest in robot caregivers",
+          "relation": "is lower among",
+          "object": "women"
+        },
+        {
+          "subject": "Interest in robot caregivers",
+          "relation": "is lower among",
+          "object": "blacks"
+        },
+        {
+          "subject": "Interest in robot caregivers",
+          "relation": "is lower among",
+          "object": "those who have not attended or graduated from college"
+        },
+        {
+          "subject": "Those who have heard a lot about robot caregivers",
+          "relation": "have",
+          "object": "70% interest in using one"
+        },
+        {
+          "subject": "Those who have heard only a little about robot caregivers",
+          "relation": "have",
+          "object": "48% interest in using one"
+        },
+        {
+          "subject": "Those who have heard nothing about robot caregivers",
+          "relation": "have",
+          "object": "35% interest in using one"
+        },
+        {
+          "subject": "Interest in robot caregivers",
+          "relation": "is relatively high among",
+          "object": "men"
+        },
+        {
+          "subject": "Interest in robot caregivers",
+          "relation": "is relatively high among",
+          "object": "college educated"
+        },
+        {
+          "subject": "Whites and blacks",
+          "relation": "include only",
+          "object": "nonHispanics"
+        },
+        {
+          "subject": "Hispanics",
+          "relation": "are of any",
+          "object": "race"
+        },
+        {
+          "subject": "Survey",
+          "relation": "was conducted by",
+          "object": "Automation in Everyday Life"
+        },
+        {
+          "subject": "Survey",
+          "relation": "was conducted from",
+          "object": "May 1-15, 2017"
+        }
+      ]
+    },
+    {
+      "uid": "2021-Apple-Catalog.pdf::6",
+      "text": "[Document: 2021-Apple-Catalog.pdf]\nDelivering an inviting and meaningful customer experience even in a high security environment. Enabling you to engage customers with high value accessory cross-merchandising. ONE PLATFORM One common platform that allows you to control where and how much security is",
+      "triples": [
+        {
+          "subject": "Series 960 POD",
+          "relation": "has feature",
+          "object": "above counter POD simplifies installation"
+        },
+        {
+          "subject": "Series 960 POD",
+          "relation": "has feature",
+          "object": "minimal contemporary design"
+        },
+        {
+          "subject": "Series 960 POD",
+          "relation": "has feature",
+          "object": "high consumer experience"
+        },
+        {
+          "subject": "Series 960 POD",
+          "relation": "has feature",
+          "object": "ability to layer bracket arms"
+        },
+        {
+          "subject": "Series 960 POD",
+          "relation": "has feature",
+          "object": "allows for cross-merchandising of accessories"
+        },
+        {
+          "subject": "Series 960 POD",
+          "relation": "is compatible with",
+          "object": "InVue's software suite for data analytics"
+        },
+        {
+          "subject": "iPhone 13 Pro One60 Tethered",
+          "relation": "has feature",
+          "object": "industry leading mechanical security with power and alarm"
+        },
+        {
+          "subject": "iPhone 13 Pro One60 Tethered",
+          "relation": "has feature",
+          "object": "4-way unibody steel security arms"
+        },
+        {
+          "subject": "iPhone 13 Pro One60 Tethered",
+          "relation": "has feature",
+          "object": "adjustable arms adapt to all iPhone and iPad models"
+        }
+      ]
+    },
+    {
+      "uid": "ACTIVISIONBLIZZARD_2019_10K.pdf::242",
+      "text": "[Document: ACTIVISIONBLIZZARD_2019_10K.pdf]\n|                                 | For the Years Ended December 31,   | For the Years Ended December 31,   | For the Years Ended December 31,   | For the Years Ended December 31,   |\n|---------------------------------|------------------------------------|",
+      "triples": [
+        {
+          "subject": "Console",
+          "relation": "had net revenues of",
+          "object": "$1,920"
+        },
+        {
+          "subject": "Console",
+          "relation": "had previous net revenues of",
+          "object": "$2,538"
+        },
+        {
+          "subject": "Console",
+          "relation": "had change in net revenues of",
+          "object": "$-618"
+        },
+        {
+          "subject": "Console",
+          "relation": "had percentage change in net revenues of",
+          "object": "-24%"
+        },
+        {
+          "subject": "PC",
+          "relation": "had net revenues of",
+          "object": "$1,718"
+        },
+        {
+          "subject": "PC",
+          "relation": "had previous net revenues of",
+          "object": "$2,180"
+        }
+      ]
+    },
+    {
+      "uid": "ACTIVISIONBLIZZARD_2019_10K.pdf::770",
+      "text": "[Document: ACTIVISIONBLIZZARD_2019_10K.pdf]\nCapitalized terms used but not defined herein shall have the meanings given to such terms in the Plan or the Award Terms, as the case may be. TERMS AND CONDITIONS This Appendix includes special terms and conditions applicable to Holders who work and/or res",
+      "triples": []
+    },
+    {
+      "uid": "2309.17421v2.pdf::36",
+      "text": "[Document: 2309.17421v2.pdf]\n can process, thereby imposing limitations on the model's capability and genericity.",
+      "triples": []
+    },
+    {
+      "uid": "ACTIVISIONBLIZZARD_2019_10K.pdf::902",
+      "text": "[Document: ACTIVISIONBLIZZARD_2019_10K.pdf]\n(d)        Confidentiality.  You  acknowledge,  and  the  Employer  agrees,  that  during  your  employment  you  will  have  access  to  and become informed of confidential and proprietary information concerning the Activision Blizzard Group. During your ",
+      "triples": [
+        {
+          "subject": "You",
+          "relation": "acknowledge",
+          "object": "confidential and proprietary information concerning the Activision Blizzard Group"
+        },
+        {
+          "subject": "You",
+          "relation": "agree",
+          "object": "confidential and proprietary information of any entity in the Activision Blizzard Group shall not be used or disclosed"
+        },
+        {
+          "subject": "You",
+          "relation": "return",
+          "object": "all such information to the Activision Blizzard Group"
+        }
+      ]
+    },
+    {
+      "uid": "User_Manual_1500S_Classic_EN.pdf::75",
+      "text": "[Document: User_Manual_1500S_Classic_EN.pdf]\nEnsure correct orientation of discharge. \u273b Refill and replace powder hopper \u273b Use the multitool to rotate the lock clockwise to\u00a0close it Portion controller with individual parts. Dosing auger iMportant 7 HaCCp cleaning schedule You are required by law to ",
+      "triples": [
+        {
+          "subject": "User",
+          "relation": "required by law to ensure",
+          "object": "customers are not subject to health hazards"
+        },
+        {
+          "subject": "User",
+          "relation": "required to carry out",
+          "object": "risk analysis on premises"
+        },
+        {
+          "subject": "HACCP cleaning schedule",
+          "relation": "used for",
+          "object": "risk identification and assessment"
+        },
+        {
+          "subject": "Analysis",
+          "relation": "aim to recognize and pre-empt",
+          "object": "food hygiene hazard points"
+        },
+        {
+          "subject": "Monitoring and test procedures",
+          "relation": "must be established and implemented",
+          "object": "for analysis purpose"
+        }
+      ]
+    },
+    {
+      "uid": "PRE_2022.09.29_NSL-politics_REPORT.pdf::3",
+      "text": "[Document: PRE_2022.09.29_NSL-politics_REPORT.pdf]\nTo further ensure the survey reflects a balanced crosssection of the nation's Hispanic adults, th e data is weighted to match the U.S. Hispanic adult population by age, gender, education, nativity, Hispanic origin group and other categories. Read mo",
+      "triples": [
+        {
+          "subject": "survey",
+          "relation": "weighted to match",
+          "object": "U.S. Hispanic adult population"
+        },
+        {
+          "subject": "data",
+          "relation": "weighted to match",
+          "object": "U.S. Hispanic adult population"
+        },
+        {
+          "subject": "Hispanic",
+          "relation": "used interchangeably with",
+          "object": "Latino"
+        },
+        {
+          "subject": "U.S. born",
+          "relation": "refers to",
+          "object": "people who are U.S. citizens at birth"
+        },
+        {
+          "subject": "foreign born",
+          "relation": "refers to",
+          "object": "persons born outside of the United States to parents neither of whom was a U.S. citizen"
+        },
+        {
+          "subject": "foreign born",
+          "relation": "used interchangeably with",
+          "object": "immigrant"
+        }
+      ]
+    },
+    {
+      "uid": "NIKE_2021_10K.pdf::412",
+      "text": "[Document: NIKE_2021_10K.pdf]\ns not recoverable, the Company will estimate the fair value of the asset group using appropriate valuation methodologies, which would typically include an estimate of discounted cash flows. Any impairment would be measured as the difference between the asset group's car",
+      "triples": [
+        {
+          "subject": "Company",
+          "relation": "estimates fair value of",
+          "object": "asset group"
+        },
+        {
+          "subject": "Company",
+          "relation": "uses",
+          "object": "appropriate valuation methodologies"
+        },
+        {
+          "subject": "appropriate valuation methodologies",
+          "relation": "include",
+          "object": "estimate of discounted cash flows"
+        },
+        {
+          "subject": "impairment",
+          "relation": "is measured as",
+          "object": "difference between asset group's carrying amount and its estimated fair value"
+        },
+        {
+          "subject": "Company",
+          "relation": "performs annual impairment tests on",
+          "object": "goodwill and intangible assets with indefinite lives"
+        },
+        {
+          "subject": "Company",
+          "relation": "performs tests in",
+          "object": "fourth quarter of each fiscal year"
+        },
+        {
+          "subject": "Company",
+          "relation": "performs tests when",
+          "object": "events occur or circumstances change"
+        },
+        {
+          "subject": "events or changes in circumstances",
+          "relation": "may trigger",
+          "object": "interim impairment reviews"
+        },
+        {
+          "subject": "events or changes in circumstances",
+          "relation": "include",
+          "object": "significant changes in business climate"
+        },
+        {
+          "subject": "events or changes in circumstances",
+          "relation": "include",
+          "object": "operating results"
+        },
+        {
+          "subject": "events or changes in circumstances",
+          "relation": "include",
+          "object": "planned investments in the reporting unit"
+        },
+        {
+          "subject": "events or changes in circumstances",
+          "relation": "include",
+          "object": "planned divestitures"
+        },
+        {
+          "subject": "events or changes in circumstances",
+          "relation": "include",
+          "object": "expectation that the carrying amount may not be recoverable"
+        }
+      ]
+    },
+    {
+      "uid": "mmdetection-readthedocs-io-en-v2.18.0.pdf::91",
+      "text": "[Document: mmdetection-readthedocs-io-en-v2.18.0.pdf]\nThe annotation json files in COCO format has the following necessary keys: ' images ' : [ { ' file_name ' : ' COCO_val2014_000000001268.jpg ' , ' height ' : 427, ' width ' : 640, ' id ' : 1268 }, ... ], ' annotations ' : [ { ' segmentation ' : [[",
+      "triples": [
+        {
+          "subject": "annotation json files",
+          "relation": "have necessary key",
+          "object": "images"
+        },
+        {
+          "subject": "images",
+          "relation": "contains",
+          "object": "list of images with their information"
+        },
+        {
+          "subject": "images",
+          "relation": "has information",
+          "object": "file_name"
+        },
+        {
+          "subject": "images",
+          "relation": "has information",
+          "object": "height"
+        },
+        {
+          "subject": "images",
+          "relation": "has information",
+          "object": "width"
+        },
+        {
+          "subject": "images",
+          "relation": "has information",
+          "object": "id"
+        },
+        {
+          "subject": "annotation json files",
+          "relation": "have necessary key",
+          "object": "annotations"
+        },
+        {
+          "subject": "annotations",
+          "relation": "contains",
+          "object": "list of instance annotations"
+        },
+        {
+          "subject": "annotations",
+          "relation": "has field",
+          "object": "segmentation"
+        },
+        {
+          "subject": "annotations",
+          "relation": "has field",
+          "object": "area"
+        },
+        {
+          "subject": "annotations",
+          "relation": "has field",
+          "object": "iscrowd"
+        },
+        {
+          "subject": "annotations",
+          "relation": "has field",
+          "object": "image_id"
+        },
+        {
+          "subject": "annotations",
+          "relation": "has field",
+          "object": "bbox"
+        },
+        {
+          "subject": "annotations",
+          "relation": "has field",
+          "object": "category_id"
+        },
+        {
+          "subject": "annotations",
+          "relation": "has field",
+          "object": "id"
+        },
+        {
+          "subject": "annotation json files",
+          "relation": "have necessary key",
+          "object": "categories"
+        },
+        {
+          "subject": "categories",
+          "relation": "contains",
+          "object": "list of categories names and their ID"
+        },
+        {
+          "subject": "categories",
+          "relation": "has field",
+          "object": "id"
+        },
+        {
+          "subject": "categories",
+          "relation": "has field",
+          "object": "name"
+        },
+        {
+          "subject": "data pre-processing",
+          "relation": "followed by",
+          "object": "two steps"
+        },
+        {
+          "subject": "users",
+          "relation": "train",
+          "object": "customized new dataset"
+        },
+        {
+          "subject": "customized new dataset",
+          "relation": "has format",
+          "object": "COCO format"
+        }
+      ]
+    },
+    {
+      "uid": "PS_2018.01.09_STEM_FINAL.pdf::198",
+      "text": "[Document: PS_2018.01.09_STEM_FINAL.pdf]\n|                                                           | Blacks in STEM jobs   | Blacks in STEM jobs   | Blacks in STEM jobs   |\n|-----------------------------------------------------------|-----------------------|-----------------------|----------------",
+      "triples": [
+        {
+          "subject": "Blacks in STEM jobs",
+          "relation": "experienced any type of racial/ethnic discrimination",
+          "object": "62%"
+        },
+        {
+          "subject": "Blacks in STEM jobs",
+          "relation": "were treated as if they were not competent",
+          "object": "45"
+        },
+        {
+          "subject": "Blacks in STEM jobs",
+          "relation": "felt isolated in their workplace",
+          "object": "29"
+        },
+        {
+          "subject": "Blacks in STEM jobs",
+          "relation": "earned less than a coworker doing the same job",
+          "object": "27"
+        },
+        {
+          "subject": "Blacks in STEM jobs",
+          "relation": "received less support from senior leaders than a coworker",
+          "object": "27"
+        },
+        {
+          "subject": "Blacks in STEM jobs",
+          "relation": "experienced repeated, small slights at work",
+          "object": ""
+        }
+      ]
+    },
+    {
+      "uid": "2303.08559v2.pdf::128",
+      "text": "[Document: 2303.08559v2.pdf]\n | Event Detection            | Event Detection            | Event Detection                                                                                                                                                                                                   ",
+      "triples": [
+        {
+          "subject": "We",
+          "relation": "have fought",
+          "object": "every institution"
+        },
+        {
+          "subject": "We",
+          "relation": "have fought",
+          "object": "every law firm"
+        },
+        {
+          "subject": "We",
+          "relation": "cost",
+          "object": "a fortune"
+        },
+        {
+          "subject": "We",
+          "relation": "are going on",
+          "object": "a massive expansion"
+        }
+      ]
+    },
+    {
+      "uid": "mmdetection-readthedocs-io-en-v2.18.0.pdf::730",
+      "text": "[Document: mmdetection-readthedocs-io-en-v2.18.0.pdf]\nloss ( cls_score , bbox_pred , labels , label_weights , bbox_targets , bbox_weights , imgs_whwh=None , reduction_override=None , **kwargs ) 'Loss function of DIIHead, get loss of all images. Parameters cls_score ( Tensor ) - Classification predic",
+      "triples": [
+        {
+          "subject": "loss",
+          "relation": "has parameter",
+          "object": "cls_score"
+        },
+        {
+          "subject": "loss",
+          "relation": "has parameter",
+          "object": "bbox_pred"
+        },
+        {
+          "subject": "loss",
+          "relation": "has parameter",
+          "object": "labels"
+        },
+        {
+          "subject": "loss",
+          "relation": "has parameter",
+          "object": "label_weights"
+        },
+        {
+          "subject": "loss",
+          "relation": "has parameter",
+          "object": "bbox_targets"
+        },
+        {
+          "subject": "loss",
+          "relation": "has parameter",
+          "object": "bbox_weights"
+        },
+        {
+          "subject": "loss",
+          "relation": "has parameter",
+          "object": "imgs_whwh"
+        },
+        {
+          "subject": "loss",
+          "relation": "has parameter",
+          "object": "reduction_override"
+        },
+        {
+          "subject": "loss",
+          "relation": "has parameter",
+          "object": "**kwargs"
+        },
+        {
+          "subject": "cls_score",
+          "relation": "has type",
+          "object": "Tensor"
+        },
+        {
+          "subject": "cls_score",
+          "relation": "has shape",
+          "object": "(batch_size * num_proposals_single_image, num_classes)"
+        },
+        {
+          "subject": "bbox_pred",
+          "relation": "has type",
+          "object": "Tensor"
+        },
+        {
+          "subject": "bbox_pred",
+          "relation": "has shape",
+          "object": "(batch_size * num_proposals_single_image, 4)"
+        },
+        {
+          "subject": "bbox_pred",
+          "relation": "represents",
+          "object": "[tl_x, tl_y, br_x, br_y]"
+        },
+        {
+          "subject": "labels",
+          "relation": "has type",
+          "object": "Tensor"
+        },
+        {
+          "subject": "labels",
+          "relation": "has shape",
+          "object": "(batch_size * num_proposals_single_image"
+        },
+        {
+          "subject": "label_weights",
+          "relation": "has type",
+          "object": "Tensor"
+        },
+        {
+          "subject": "label_weights",
+          "relation": "has shape",
+          "object": "(batch_size * num_proposals_single_image"
+        },
+        {
+          "subject": "bbox_targets",
+          "relation": "has type",
+          "object": "Tensor"
+        },
+        {
+          "subject": "bbox_targets",
+          "relation": "has shape",
+          "object": "(batch_size * num_proposals_single_image, 4)"
+        },
+        {
+          "subject": "bbox_targets",
+          "relation": "represents",
+          "object": "[tl_x, tl_y, br_x, br_y]"
+        }
+      ]
+    },
+    {
+      "uid": "efd88e41c5f2606c57929cac6c1c0605.pdf::47",
+      "text": "[Document: efd88e41c5f2606c57929cac6c1c0605.pdf]\nMichael Kuperberg , Executive Director, USGCRP, White House OSTP Ben DeAngelo , Deputy Executive Director, USGCRP, White House OSTP Katharine Jacobs , Director, National Climate Assessment, White House OSTP (through December 2013) Thomas Armstrong , E",
+      "triples": [
+        {
+          "subject": "Michael Kuperberg",
+          "relation": "is",
+          "object": "Executive Director"
+        },
+        {
+          "subject": "Michael Kuperberg",
+          "relation": "is affiliated with",
+          "object": "USGCRP"
+        },
+        {
+          "subject": "Michael Kuperberg",
+          "relation": "is affiliated with",
+          "object": "White House OSTP"
+        },
+        {
+          "subject": "Ben DeAngelo",
+          "relation": "is",
+          "object": "Deputy Executive Director"
+        },
+        {
+          "subject": "Ben DeAngelo",
+          "relation": "is affiliated with",
+          "object": "USGCRP"
+        },
+        {
+          "subject": "Ben DeAngelo",
+          "relation": "is affiliated with",
+          "object": "White House OSTP"
+        },
+        {
+          "subject": "Katharine Jacobs",
+          "relation": "is",
+          "object": "Director"
+        },
+        {
+          "subject": "Katharine Jacobs",
+          "relation": "is affiliated with",
+          "object": "National Climate Assessment"
+        },
+        {
+          "subject": "Katharine Jacobs",
+          "relation": "is affiliated with",
+          "object": "White House OSTP"
+        },
+        {
+          "subject": "Katharine Jacobs",
+          "relation": "tenured until",
+          "object": "December 2013"
+        },
+        {
+          "subject": "Thomas Armstrong",
+          "relation": "is",
+          "object": "Executive Director"
+        },
+        {
+          "subject": "Thomas Armstrong",
+          "relation": "is affiliated with",
+          "object": "USGCRP NCO"
+        },
+        {
+          "subject": "Thomas Armstrong",
+          "relation": "is affiliated with",
+          "object": "White House OSTP"
+        },
+        {
+          "subject": "Thomas Armstrong",
+          "relation": "tenured until",
+          "object": "December 2014"
+        },
+        {
+          "subject": "Christopher P. Weaver",
+          "relation": "is",
+          "object": "Executive Director (Acting)"
+        },
+        {
+          "subject": "Christopher P. Weaver",
+          "relation": "is affiliated with",
+          "object": "USGCRP NCO"
+        },
+        {
+          "subject": "Christopher P. Weaver",
+          "relation": "is affiliated with",
+          "object": "White House OSTP"
+        },
+        {
+          "subject": "Christopher P. Weaver",
+          "relation": "tenured until",
+          "object": "August 2015"
+        },
+        {
+          "subject": "Christopher P. Weaver",
+          "relation": "was formerly",
+          "object": "Deputy Director"
+        },
+        {
+          "subject": "Glynis C. Lough",
+          "relation": "is",
+          "object": "Chief of Staff"
+        },
+        {
+          "subject": "Glynis C. Lough",
+          "relation": "is affiliated with",
+          "object": "National Climate Assessment"
+        },
+        {
+          "subject": "Bradley Akamine",
+          "relation": "is",
+          "object": "Chief Digital Officer"
+        },
+        {
+          "subject": "Mark M. Shimamoto",
+          "relation": "is",
+          "object": "Health Program Lead"
+        },
+        {
+          "subject": "Ilya Fischhoff",
+          "relation": "is",
+          "object": "Senior Scientist"
+        },
+        {
+          "subject": "Ilya Fischhoff",
+          "relation": "is affiliated with",
+          "object": "National Climate Assessment"
+        },
+        {
+          "subject": "Emily Therese Cloyd",
+          "relation": "is",
+          "object": "Engagement and Outreach Lead"
+        },
+        {
+          "subject": "Steve Aulenbach",
+          "relation": "is",
+          "object": "GCIS Content Curator"
+        },
+        {
+          "subject": "Steve Aulenbach",
+          "relation": "tenured until",
+          "object": "September 2015"
+        },
+        {
+          "subject": "Samantha Brooks",
+          "relation": "is",
+          "object": "SGCR Executive Secretary"
+        },
+        {
+          "subject": "Samantha Brooks",
+          "relation": "tenured until",
+          "object": "July 2015"
+        },
+        {
+          "subject": "Tess Carter",
+          "relation": "is",
+          "object": "Student Assistant"
+        },
+        {
+          "subject": "Tess Carter",
+          "relation": "is affiliated with",
+          "object": "National Climate Assessment"
+        },
+        {
+          "subject": "Brian Duggan",
+          "relation": "is",
+          "object": "GCIS Lead System Engineer"
+        },
+        {
+          "subject": "Brian Duggan",
+          "relation": "tenured until",
+          "object": "September 2015"
+        }
+      ]
+    },
+    {
+      "uid": "earlybird-110722143746-phpapp02_95.pdf::7",
+      "text": "[Document: earlybird-110722143746-phpapp02_95.pdf]\nThese market changes have led to significant european advantages in entry valuations,capital efficiency and hitrate $388M BenchmarkingofVc PerformanceDrivers, Europe vs.USA, 2004-2011ytd $79M $5.5M AverageEntry Valuation*\" 100% USA $16.1M Europe S44",
+      "triples": [
+        {
+          "subject": "Europe",
+          "relation": "has average entry valuation of",
+          "object": "$388M"
+        },
+        {
+          "subject": "USA",
+          "relation": "has average entry valuation of",
+          "object": "$79M"
+        },
+        {
+          "subject": "Europe",
+          "relation": "has average exit valuation of",
+          "object": "$5.5M"
+        },
+        {
+          "subject": "USA",
+          "relation": "has average exit valuation of",
+          "object": "$16.1M"
+        },
+        {
+          "subject": "Europe",
+          "relation": "has average capital of",
+          "object": "$44M"
+        },
+        {
+          "subject": "USA",
+          "relation": "has average capital of",
+          "object": "$304M"
+        },
+        {
+          "subject": "European VC Funds",
+          "relation": "have visibility for investors that is",
+          "object": "highly limited"
+        },
+        {
+          "subject": "European VC Funds",
+          "relation": "are prejudiced by",
+          "object": "the poor quality of published industry fund statistics in Europe"
+        },
+        {
+          "subject": "Europe",
+          "relation": "has data set size of",
+          "object": "21% of funds in database"
+        },
+        {
+          "subject": "Europe",
+          "relation": "represents",
+          "object": "15% of the industry"
+        }
+      ]
+    },
+    {
+      "uid": "obs-productdesc-en.pdf::154",
+      "text": "[Document: obs-productdesc-en.pdf]\nSelect a region close to you or your target users. This reduces network latency and improves access speed. However, Chinese mainland regions provide the same infrastructure, BGP network quality, as well as resource operations and configurations. If you or your targ",
+      "triples": [
+        {
+          "subject": "Chinese mainland regions",
+          "relation": "provide",
+          "object": "same infrastructure"
+        },
+        {
+          "subject": "Chinese mainland regions",
+          "relation": "provide",
+          "object": "BGP network quality"
+        },
+        {
+          "subject": "Chinese mainland regions",
+          "relation": "provide",
+          "object": "resource operations and configurations"
+        },
+        {
+          "subject": "Asia Pacific region",
+          "relation": "should select",
+          "object": "AP-Bangkok"
+        },
+        {
+          "subject": "Asia Pacific region",
+          "relation": "should select",
+          "object": "AP-Singapore"
+        },
+        {
+          "subject": "Africa",
+          "relation": "should select",
+          "object": "AF-Johannesburg"
+        },
+        {
+          "subject": "Europe",
+          "relation": "should select",
+          "object": "EU-Paris"
+        },
+        {
+          "subject": "Resource prices",
+          "relation": "may vary depending on",
+          "object": "different regions"
+        },
+        {
+          "subject": "AZ selection",
+          "relation": "should consider",
+          "object": "applications' requirements for disaster recovery"
+        },
+        {
+          "subject": "AZ selection",
+          "relation": "should consider",
+          "object": "network latency"
+        }
+      ]
+    },
+    {
+      "uid": "mmdetection-readthedocs-io-en-v2.18.0.pdf::179",
+      "text": "[Document: mmdetection-readthedocs-io-en-v2.18.0.pdf]\nExamples: Assuming that you have already downloaded the Faster R-CNN model checkpoint to the directory checkpoints/ . python -m torch.distributed.launch --nproc_per_node=1 --master_port=29500 tools/analysis_ \u02d3 \u2192 tools/benchmark.py \\ configs/faste",
+      "triples": [
+        {
+          "subject": "Faster R-CNN model checkpoint",
+          "relation": "downloaded to",
+          "object": "checkpoints/ directory"
+        },
+        {
+          "subject": "python",
+          "relation": "executes",
+          "object": "tools/analysis_tools/benchmark.py"
+        },
+        {
+          "subject": "tools/analysis_tools/benchmark.py",
+          "relation": "uses",
+          "object": "configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py"
+        },
+        {
+          "subject": "tools/analysis_tools/benchmark.py",
+          "relation": "uses",
+          "object": "checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth"
+        },
+        {
+          "subject": "tools/analysis_tools/eval_metric.py",
+          "relation": "evaluates",
+          "object": "certain metrics"
+        },
+        {
+          "subject": "tools/analysis_tools/eval_metric.py",
+          "relation": "uses",
+          "object": "pkl result file"
+        },
+        {
+          "subject": "tools/analysis_tools/eval_metric.py",
+          "relation": "uses",
+          "object": "config file"
+        },
+        {
+          "subject": "tools/misc/print_config.py",
+          "relation": "prints",
+          "object": "whole config"
+        },
+        {
+          "subject": "tools/misc/print_config.py",
+          "relation": "expands",
+          "object": "all its imports"
+        }
+      ]
+    }
+  ]
+}

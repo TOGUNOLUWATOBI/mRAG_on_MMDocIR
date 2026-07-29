@@ -364,3 +364,39 @@ Across Epics 2–9, every angle has now been checked: naive fusion, tuned fusion
 ### Commits
 
 Results only, no code changes this epic: `agentic_kg_routing_multihop_v3.json`, `hybrid_weighted_eval_150_v2.json`, `rrf_weight_sweep_full150.json`, `rescue_analysis_full150.json`.
+
+---
+
+## Epic 10 — Is it the extraction model? (raised by user, investigated directly)
+
+Epics 2–9 treated the graph as fixed and exhaustively tested how well retrieval *uses* it. This epic checks the graph's own quality — extracted by `llama3:8b`, chosen for speed over the alternative `qwen3:32b` — for the first time.
+
+### Hand-audit of the existing graph (12 chunks, stratified sample)
+
+Pulled every triple the current graph attributes to a random sample of chunks and read them against the source text. Most were reasonably grounded (citation lists, factual survey/report content, product docs). But one was a **flagrant, confirmed hallucination**: chunk `936c0e2c...pdf::24` is a blank/garbled table row (literally just dashes and pipes, no real content) — yet the graph attributes it three fabricated corporate facts: `(Apple, reported revenue of, $94.9B)`, plus invented Amazon and Microsoft facts. The Apple/$94.9B triple is **word-for-word the few-shot example in `kg_builder.py`'s own prompt** — given nothing to extract, the model regurgitated its own example instead of returning `[]`.
+
+### Live side-by-side comparison: `llama3:8b` vs. `qwen3:32b`, same chunks, same prompt
+
+Re-ran extraction on the exact chunk above plus two more (a table-misreading case, a vague curriculum-text case) with both models:
+
+| Case | `llama3:8b` | `qwen3:32b` |
+|---|---|---|
+| Blank/garbled table | Fabricated 3 facts (the hallucination above) | **Correctly returned `[]`** |
+| Table checkmark-matrix (RAG survey metrics) | Garbled column names, some rows missed | More faithful to actual column headers, more complete |
+| Curriculum standards text | Vague, fragmented, one relation backwards | Correctly captured the real unit/quarter/assignment hierarchy |
+
+### Quantified on a larger sample (30 chunks, both models, same prompt)
+
+Broader pattern, not just the one flagrant case: **`llama3:8b` fabricated non-trivial content on at least 4/30 sampled chunks** that had no real extractable facts (bare section headings, legal-boilerplate cross-references, dangling sentence fragments) — inventing plausible-sounding but unsupported triples rather than recognizing there was nothing to extract. **`qwen3:32b` correctly returned `[]` on all of those same chunks.** Beyond hallucination-avoidance, `qwen3:32b` was also consistently more complete on chunks with real content (e.g. correctly parsing garbled OCR'd VC-deck statistics — `$173M`, `236M`, `131`, `596` — that `llama3:8b` missed entirely, even inventing a garbage OCR artifact word, "omebac", as an entity).
+
+**What this does and doesn't explain:** this is real, demonstrated evidence that `llama3:8b`'s extraction quality is a genuine contributing factor to graph noise — plausibly explaining some of the generic pseudo-entity nodes ("time", "many", "the") that have caused problems since Epic 1. It does **not** explain everything: the table/checkmark-matrix misreading persisted in *both* models (a prompt/schema design issue, not a model-capability one — consistent with Epic 8's `graph_task_fit` finding that triples don't naturally represent tabular data), and it has no bearing on the two other independently-confirmed, model-independent problems: blunt word-boundary/substring matching (vs. dense embeddings) and the shared generation-reasoning ceiling that caps every system, KG included, at the same low exact-match rate on hard questions.
+
+### Cost of finding out for certain
+
+Measured directly (8-chunk timing sample): `llama3:8b` averages 2.06s/chunk (consistent with the original ~7.3-hour build over 12,747 chunks), `qwen3:32b` averages 7.61s/chunk — **3.7x slower**. A full re-extraction of the corpus would take an estimated **~27 hours** of sequential LLM calls against the shared university endpoint (`kg_builder.py`'s `build_graph` has no concurrency), against the original build's ~7.3 hours. The `think=False`/qwen3 landmine fixed defensively in Epic 8 is confirmed necessary and working — `qwen3:32b` extraction ran cleanly with no leaked `<think>` blocks in this test.
+
+**Recommendation, not yet acted on:** the evidence justifies a re-extraction, but a ~27-hour full rebuild is a real resource commitment against a shared endpoint with an uncertain (though plausible) payoff, given the independently-confirmed structural issues above would persist regardless. Left as an explicit decision for the user rather than launched unprompted.
+
+### Commits
+
+Results only: `extraction_model_comparison_sample30.json`. No code changes — the `think=False` qwen3 fix from Epic 8 already made this test possible.
