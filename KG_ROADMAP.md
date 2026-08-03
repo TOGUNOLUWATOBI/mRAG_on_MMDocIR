@@ -400,3 +400,24 @@ Measured directly (8-chunk timing sample): `llama3:8b` averages 2.06s/chunk (con
 ### Commits
 
 Results only: `extraction_model_comparison_sample30.json`. No code changes — the `think=False` qwen3 fix from Epic 8 already made this test possible.
+
+---
+
+## Epic 11 — Statistical rigor, for publication
+
+The one methodological gap flagged repeatedly since Epic 7 and never closed: every benchmark number in this project was a single run, with no confidence intervals and no significance testing. Closed it, in preparation for writing this work up as a paper.
+
+**McNemar's test** (paired, same 150 questions) on the three headline retrieval comparisons — all significant:
+- Baseline vs. Hybrid(0.3): χ²=13.78, **p=0.00021**
+- Baseline vs. KG-only: χ²=81.28, **p<0.00001**
+- **Hybrid(0.0, no KG) vs. Hybrid(0.3): χ²=7.04, p=0.00796** — the critical one: adding KG at the shipped default weight is a statistically significant regression relative to not using it, not sampling noise.
+
+**Bootstrap 95% CIs** (question-level resampling, 5,000 iterations) on P@1 for all four systems — all difference CIs exclude zero (Baseline − Hybrid(0.3): 0.147, CI [0.073, 0.213]; Baseline − KG-only: 0.580, CI [0.493, 0.660]).
+
+**Repeated trials (n=3) on Agentic+KG-routing free-choice**, the one part of the pipeline with genuine LLM-call stochasticity: across three independent runs, the aggregate retrieval outcome was **bit-for-bit identical every time** (P@1=0.6842, NDCG@5=0.7174, MAP=0.7105), even though the categorical count of `kg_multihop` selections varied (3, 3, 5 of 19). The routing decision is stochastic; the resulting retrieval quality is not — a stable, low-variance result worth reporting as such.
+
+All findings from Epics 0–11 are now compiled, restructured by claim rather than chronology, into `KG_RESEARCH_FINDINGS.md` — written specifically as source material for a paper, with a suggested reframing of the negative result (§10 of that document): not "KG doesn't work," but a boundary condition — this corpus's tabular/numeric question structure doesn't map onto entity-relation triples, a mismatch that persisted across two extraction models of different capability.
+
+### Commits
+
+Code: none. Results: `statistical_significance_analysis.json`, `agentic_kg_routing_multihop_trial4.json`. New document: `KG_RESEARCH_FINDINGS.md`.
