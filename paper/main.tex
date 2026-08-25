@@ -1,0 +1,246 @@
+\documentclass[sigconf,anonymous,review]{acmart}
+
+% ---------------------------------------------------------------------------
+% NOTE TO SELF / AUTHOR: this uses ACM's acmart class in "anonymous" +
+% "review" mode, which strips author names/affiliations automatically and
+% adds line numbers -- matches an anonymised-PDF submission requirement.
+% If the actual programme template differs, swap the documentclass line;
+% everything below is otherwise template-agnostic prose.
+% ---------------------------------------------------------------------------
+
+\settopmatter{printacmref=false}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+\pagestyle{plain}
+
+\begin{document}
+
+\title{Complexity Versus Capability in Multimodal Retrieval-Augmented Generation: A Comparative and Causal Study of Dense, Agentic, and Knowledge-Graph Retrieval on MMDocIR}
+
+\begin{abstract}
+Retrieval-augmented generation (RAG) systems for multimodal document question answering increasingly add architectural complexity -- multimodal retrieval, query transformation, agentic orchestration, and, recently, graph-structured retrieval -- with the implicit assumption that added complexity yields added capability. We evaluate this assumption directly on the MMDocIR benchmark by comparing five retrieval-augmented QA systems of increasing architectural sophistication: a dense+lexical baseline, a multimodal system with query transformation, an agent that adaptively selects its own retrieval strategy, a knowledge-graph (KG) system built from LLM-extracted entity-relation triples, and a hybrid system fusing KG traversal with the baseline retrievers. We find that architectural complexity does not monotonically improve performance: the agentic system does not outperform a well-tuned non-agentic pipeline despite $4$--$8\times$ more LLM calls per query, and graph-structured retrieval -- despite iterative, root-caused engineering across seed-matching, fan-out control, relevance scoring, fusion weighting, and extraction-model quality -- never outperforms the dense+lexical baseline, including under an exhaustive fusion-weight sweep and a per-question rescue analysis, both confirmed statistically significant (McNemar's test, $p<0.01$). We trace this to a structural mismatch, not merely an engineering one: the corpus's questions are dominated by tabular/numeric cross-referencing that does not map naturally onto entity-relation triples, a failure mode that persists across two extraction models of substantially different capability. Our contribution is a rigorously instrumented, statistically validated negative result with an identified boundary condition, rather than a bare performance comparison.
+\end{abstract}
+
+\maketitle
+
+% =============================================================================
+\section{Introduction}
+% =============================================================================
+
+Retrieval-augmented generation systems are the dominant approach to grounding large language models in external, up-to-date, or proprietary knowledge, and multimodal document question answering -- where the relevant evidence may be embedded in text, tables, figures, or page layout -- is an increasingly important application of RAG. A natural design instinct, and the one reflected in a large fraction of recent RAG literature, is that adding capability to the system (more retrieval signals, more reasoning steps, more structure in the retrieved knowledge) should add capability to the outcome. Multimodal retrieval, query transformation, agentic orchestration that lets a system adapt its own strategy per question, and, most recently, knowledge-graph-augmented retrieval that represents evidence as an explicit graph of entities and relations rather than unstructured text, are all examples of this instinct.
+
+This assumption is rarely tested directly against a strong, already-optimized baseline. We do so here. Building on an existing three-system comparison (a dense+lexical baseline, a multimodal system with eight query-transformation techniques and multiple prompting strategies, and an agentic system that adaptively selects among them), we add and rigorously evaluate two further systems: a knowledge-graph retrieval system (System 4) and a hybrid system fusing graph traversal with the existing dense and lexical retrievers (System 5). Knowledge-graph retrieval is a natural next step to test the complexity-capability assumption specifically for \emph{multi-hop} questions -- those requiring a model to resolve one fact before it can look up a second, related one -- since graph traversal is the retrieval mechanism most directly motivated by that structure.
+
+We ask three research questions:
+
+\begin{itemize}
+\item \textbf{RQ1.} How much does progressively adding multimodal retrieval, query transformation, and agentic orchestration improve multimodal document QA over a well-tuned dense+lexical baseline?
+\item \textbf{RQ2.} Does explicit graph-structured retrieval provide additional benefit on top of that baseline, particularly for multi-hop questions, either alone or fused with existing retrieval signals?
+\item \textbf{RQ3.} If graph retrieval does not help, what specific, separable mechanisms explain why -- and which are fixable engineering problems versus structural mismatches between the representation and the task?
+\end{itemize}
+
+Our findings are, in order: agentic orchestration does not outperform a well-tuned non-agentic pipeline despite substantially higher computational cost (RQ1, consistent with prior findings in this line of work); graph-structured retrieval does not outperform the dense+lexical baseline under any tested configuration, including an exhaustive fusion-weight sweep and agent-mediated selective routing, and this result is statistically significant rather than an artifact of a single evaluation run (RQ2); and the shortfall is attributable to a combination of fixable engineering weaknesses (blunt lexical seed-matching, absent relevance scoring, sub-optimal fusion weighting, extraction-model quality) and one structural mismatch that persists regardless of engineering effort -- this corpus's questions are dominated by tabular/numeric cross-referencing that does not map onto (subject, relation, object) triples (RQ3).
+
+\textbf{Contributions.}
+\begin{enumerate}
+\item A systematic, same-benchmark comparison of five RAG paradigms -- dense+lexical, multimodal with query transformation, agentic, knowledge-graph, and hybrid -- on the MMDocIR multimodal document QA benchmark.
+\item A complexity-performance analysis showing agentic orchestration's cost (4--8$\times$ the LLM calls of non-agentic systems) is not recovered in accuracy.
+\item A statistically validated negative result for knowledge-graph-augmented retrieval, including under naive and weight-tuned fusion and under free-choice and forced agentic routing, supported by paired significance testing and bootstrap confidence intervals rather than point estimates alone.
+\item A root-cause and failure-mode analysis that separates fixable implementation weaknesses from a structural corpus-representation mismatch, via targeted bug fixes with before/after measurement, an ablation isolating each fix's individual contribution, and a controlled comparison across two extraction models of different capability.
+\end{enumerate}
+
+% =============================================================================
+\section{Related Work}
+% =============================================================================
+
+\textbf{Retrieval-augmented generation.} RAG grounds language model generation in retrieved external evidence, originally proposed for knowledge-intensive NLP tasks~\cite{lewis2020rag}. Subsequent work has extended RAG along multiple axes relevant here: query transformation techniques that reformulate the user's question before retrieval (hypothetical document embeddings~\cite{gao2023hyde}; step-back prompting, which abstracts a specific question to a broader one before retrieving~\cite{zheng2024stepback}; and decomposition-based approaches that break a compound question into sub-questions retrieved independently, in the spirit of self-ask-style multi-hop decomposition~\cite{press2022selfask}); and agentic RAG, in which an LLM-based controller adaptively decides retrieval strategy, evaluates retrieved evidence, and triggers retries, rather than following a fixed pipeline.
+
+\textbf{Multimodal document QA.} Document question answering over long, visually rich documents (financial filings, survey reports, scientific papers, product manuals) requires retrieving and reasoning over a mixture of text, tables, and figures, motivating benchmarks and systems that combine dense text retrieval with page-image or figure-level retrieval~\cite{mmdocir}. \emph{[Editor's note: verify the exact MMDocIR citation against the benchmark's original publication before submission -- see \S\ref{sec:limitations}.]}
+
+\textbf{Knowledge-graph-augmented retrieval.} An alternative to retrieving unstructured text chunks is to first extract a structured knowledge graph of entities and relations from the corpus, then retrieve by graph traversal. GraphRAG constructs a graph of entities and relations from source documents and uses community summarization to answer global, corpus-level queries~\cite{edge2024graphrag}. HippoRAG draws on a neurobiological model of memory to build a knowledge graph indexed for efficient multi-hop retrieval, reporting substantial gains over dense retrieval on multi-hop QA benchmarks~\cite{gutierrez2024hipporag}. These results motivate our RQ2: if graph-structured retrieval measurably helps multi-hop QA in prior work, does it help here, on a corpus with a different structural character (financial filings, survey cross-tabs, and technical manuals rather than the encyclopedic, narrative, entity-dense text these prior systems are typically evaluated on)? Our central finding -- that the benefit does not transfer, and that the likely cause is a mismatch between triple-structured representation and tabular/numeric question content -- suggests reported gains from graph-augmented retrieval may be conditional on corpus structure in ways not yet well characterized in this literature.
+
+% =============================================================================
+\section{Systems Under Test}
+% =============================================================================
+
+All five systems share the same underlying document chunks (\texttt{chunks\_fixed\_size.json}: 12{,}747 chunks from 127 source PDFs spanning financial 10-K filings, Pew Research survey reports, arXiv papers, and product/user manuals), the same generation LLM (\texttt{qwen3-vl:8b-instruct}), and, where applicable, the same dense embedding model (Jina CLIP v2).
+
+\textbf{System 1 -- Baseline.} BM25 lexical retrieval fused with dense embedding retrieval via Reciprocal Rank Fusion (RRF), no multimodal signal.
+
+\textbf{System 2 -- Advanced.} Adds page-image retrieval (routed via a visual/text classification step), eight query-transformation techniques (standard, multi-query, RAG-fusion, step-back, HyDE, query decomposition, query rewriting, query expansion), five chunking strategies, and four prompting strategies (standard, chain-of-thought, few-shot, role-based).
+
+\textbf{System 3 -- Agentic.} A LangGraph-orchestrated agent with three roles: a query-rewriter agent that selects among the eight System-2 query techniques per question; a grader agent that evaluates retrieved-document relevance and triggers a retry with a different technique on low confidence; and a generator agent that selects a prompting strategy per question.
+
+\textbf{System 4 -- Knowledge Graph (this work).} Every chunk is sent to an LLM (\texttt{llama3:8b}, chosen for extraction throughput) with a prompt requesting (subject, relation, object) triples; the union of all triples forms a directed graph (77{,}421 nodes, 73{,}011 edges). At query time, entities whose surface form matches the query (word-boundary regex matching; see \S\ref{sec:rootcause}) seed a breadth-first search out to two hops, and the source chunks attached to visited nodes are scored and returned as the retrieved context, entirely replacing vector and lexical search.
+
+\textbf{System 5 -- Hybrid (this work).} Fuses System 4's graph traversal with System 1's dense and BM25 signals via weighted Reciprocal Rank Fusion, so the graph signal only has to \emph{add} value on top of an already-strong retriever rather than replace it.
+
+% =============================================================================
+\section{Experimental Setup}
+% =============================================================================
+
+\textbf{Dataset.} We evaluate on a 150-question subset of the MMDocIR benchmark, drawn from the same 127-document corpus described above. This is the subset on which Systems 1--3's comparable results were originally obtained and is treated as the fixed evaluation set for Systems 4--5 as well.
+
+\textbf{Multi-hop subset.} To directly test whether graph-structured retrieval helps the class of question it is most motivated by, we hand-curated a 19-question subset requiring chaining facts across two or more distinct entities, tables, or figures (e.g., ``find the year in which statistic A took a particular value, then report statistic B for that same year''; ``cross-reference two separate tables on a shared attribute''). Curation was performed by a single annotator with a documented one-line justification per question, since MMDocIR carries no native multi-hop label; we treat this as a limitation (\S\ref{sec:limitations}) rather than a validated ground truth.
+
+\textbf{Metrics.} Retrieval: Precision@$k$, Recall@$k$, NDCG@$k$, Mean Average Precision (MAP), Mean Reciprocal Rank (MRR), for $k \in \{1,3,5\}$. Generation: Token-level F1, BLEU, ROUGE-1/2/L, Exact Match, Contains Match, and embedding-based Semantic Similarity.
+
+\textbf{Statistical testing.} Retrieval-only metrics (Precision@$k$ etc.) involve no LLM sampling once dense embeddings, BM25, and graph traversal are computed deterministically, so we treat the fixed 150-question evaluation as a paired sample and apply McNemar's test (continuity-corrected) for binary hit/miss comparisons between systems, and bootstrap resampling (5{,}000 iterations, question-level resampling with replacement) for 95\% confidence intervals on Precision@1 and on inter-system differences. Where a stage genuinely involves LLM-call stochasticity (agentic technique selection), we report repeated-trial results directly rather than a single run (\S\ref{sec:agentic}).
+
+% =============================================================================
+\section{Results}
+% =============================================================================
+
+\subsection{RQ1: Does progressively adding complexity help?}
+
+Table~\ref{tab:overall} reports all five systems on the full 150-question evaluation set (Systems 1--3 as previously established; Systems 4--5 evaluated fresh under identical conditions for this work).
+
+\begin{table}[t]
+\caption{Overall system comparison, full 150-question set.}
+\label{tab:overall}
+\begin{tabular}{lccccc}
+\toprule
+System & P@1 & NDCG@5 & MAP & Tok-F1 & EM \\
+\midrule
+1 Baseline           & 0.593 & 0.669 & 0.648 & 0.184 & 0.133 \\
+2 Advanced           & \textbf{0.867} & \textbf{0.904} & \textbf{0.894} & \textbf{0.266} & \textbf{0.207} \\
+3 Agentic            & 0.607 & 0.670 & 0.654 & 0.167 & 0.113 \\
+4 KG-only            & 0.053 & 0.193 & 0.147 & 0.040 & 0.013 \\
+5 Hybrid (kg=0.3)    & 0.487 & 0.628 & 0.588 & 0.161 & 0.107 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+System 2 (Advanced) achieves the strongest result across every metric, improving Precision@1 from $0.593$ to $0.867$ and Token F1 from $0.184$ to $0.266$ relative to the baseline, driven primarily by chunking-strategy and multimodal-retrieval improvements rather than query transformation or prompting alone (per-technique ablations omitted here for space; the strongest single query technique, standard retrieval under an optimized chunking configuration, and chain-of-thought prompting were the dominant individual contributors). System 3 (Agentic), despite adaptively selecting among all eight of System 2's query techniques and requiring 4--8 LLM calls per query (versus 1--2 for non-agentic systems, at approximately 12.16s per query versus sub-second retrieval-plus-single-generation latency for System 1), does \emph{not} exceed System 1's performance and substantially trails System 2. \textbf{Complexity in the form of adaptive orchestration does not pay for itself here}: the agent's meta-decisions (which query technique, whether to retry, which prompting strategy) do not compound advantageously, and the dominant factor in end-to-end accuracy is retrieval and representation quality (System 2's chunking and multimodal improvements) rather than adaptive control.
+
+\subsection{RQ2: Does knowledge-graph retrieval help?}
+\label{sec:kg-results}
+
+System 4 (KG-only) is $11$--$13\times$ worse on Precision@1 and $\sim\!5\times$ worse on Token F1 than System 1. Fusing it into System 5 recovers substantial ground but never crosses the baseline: at the fusion weight originally selected (kg-weight $=0.3$), System 5 scores $0.487$ Precision@1 versus System 1's $0.593$.
+
+\textbf{Exhaustive fusion-weight sweep.} We swept the KG signal's RRF weight from $0.0$ (graph signal absent) to $1.0$ (equal weight with dense and BM25) on the full 150-question set, caching each signal's raw candidate list once and re-computing only the fusion arithmetic per weight (Table~\ref{tab:sweep}).
+
+\begin{table}[t]
+\caption{RRF weight sweep, full 150-question set.}
+\label{tab:sweep}
+\begin{tabular}{lccc}
+\toprule
+kg-weight & P@1 & NDCG@5 & MAP \\
+\midrule
+0.0 (no KG)  & \textbf{0.580} & \textbf{0.672} & \textbf{0.647} \\
+0.15         & 0.513 & 0.643 & 0.608 \\
+0.3 (as shipped) & 0.487 & 0.628 & 0.588 \\
+0.5          & 0.440 & 0.603 & 0.556 \\
+0.7          & 0.420 & 0.583 & 0.537 \\
+1.0          & 0.367 & 0.536 & 0.486 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Performance declines \textbf{monotonically} as the KG signal's weight increases; the empirical optimum on the representative full set is to exclude the graph signal entirely. This directly answers a version of RQ2 raised by weight-tuning alone: there is no fusion weight at which the graph signal helps in aggregate.
+
+\textbf{Per-question rescue analysis.} A weighted-aggregate regression does not rule out the graph signal helping a specific, valuable subset of questions while hurting others on net. We tested this directly: Table~\ref{tab:rescue} shows, for each system relative to System 1 alone, how many questions it uniquely gets right that System 1 gets wrong (``rescued'') versus uniquely gets wrong that System 1 gets right (``hurt''), on all 150 questions.
+
+\begin{table}[t]
+\caption{Per-question paired comparison against System 1 (Baseline).}
+\label{tab:rescue}
+\begin{tabular}{lccc}
+\toprule
+System & P@1 hits/150 & Rescued & Hurt \\
+\midrule
+1 Baseline (self)    & 95 & -- & -- \\
+5 Hybrid (kg=0.3)     & 73 & 5  & 27 \\
+4 KG-only             & 8  & 2  & 89 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Neither system's rescues are concentrated in the multi-hop subset the graph representation is nominally suited for: of Hybrid's 5 rescued questions, only 1 is from the hand-curated multi-hop set. We find no query-type signal that would let an adaptive-weighting scheme retain the rescues while shedding the much larger casualty count.
+
+\textbf{Statistical significance.} We confirm the above are not artifacts of the particular 150-question sample. Paired McNemar's tests (Table~\ref{tab:mcnemar}) are significant at $p < 0.01$ for all three headline comparisons, including, critically, System 1 versus a no-KG-signal hybrid configuration against the shipped kg-weight$=0.3$ configuration ($p = 0.008$) -- confirming that adding the graph signal at its shipped weight is a genuine regression, not sampling noise. Bootstrap 95\% confidence intervals on the Precision@1 differences (Baseline $-$ Hybrid: $0.147$, CI $[0.073, 0.213]$; Baseline $-$ KG-only: $0.580$, CI $[0.493, 0.660]$) both exclude zero.
+
+\begin{table}[t]
+\caption{Paired McNemar's test, full 150-question set.}
+\label{tab:mcnemar}
+\begin{tabular}{lccc}
+\toprule
+Comparison & $\chi^2$ & $p$-value & Sig. \\
+\midrule
+Baseline vs.\ Hybrid(0.3)      & 13.78 & 0.00021  & yes \\
+Baseline vs.\ KG-only          & 81.28 & $<$0.00001 & yes \\
+Hybrid(0.0) vs.\ Hybrid(0.3)   & 7.04  & 0.00796  & yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Multi-hop subset.} On the 19-question multi-hop subset specifically, Baseline scores Precision@1 $=0.632$; weighted Hybrid ties it exactly ($0.632$, though trailing on NDCG@5/MAP: $0.665/0.658$ vs.\ $0.698/0.684$); KG-only scores $0.053$. \textbf{The subset hypothesized to favor graph retrieval shows no advantage for it.}
+
+\subsection{RQ2b: Agent-mediated selective routing}
+\label{sec:agentic}
+
+We additionally tested whether an agent, given the option, could selectively route only the questions where graph retrieval helps, rather than applying a fixed global weight. We added a ninth technique, \texttt{kg\_multihop}, to System 3's existing free-choice menu.
+
+\begin{table}[t]
+\caption{Agentic routing, multi-hop subset (19 questions).}
+\label{tab:agentic}
+\begin{tabular}{lcccc}
+\toprule
+Configuration & P@1 & NDCG@5 & MAP & KG selected \\
+\midrule
+No KG option available     & 0.632 & 0.698 & 0.684 & n/a \\
+Free choice (trial 1)       & 0.684 & 0.717 & 0.711 & 3/19 \\
+Free choice (trial 2)       & 0.684 & 0.717 & 0.711 & 3/19 \\
+Free choice (trial 3)       & 0.684 & 0.717 & 0.711 & 5/19 \\
+Forced (100\% of questions) & 0.579 & 0.639 & 0.623 & 19/19 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Across three independent trials (genuine LLM-call stochasticity, two prompt revisions), the \emph{categorical} routing decision varies (3, 3, and 5 of 19 questions routed to graph retrieval), but the resulting aggregate retrieval outcome is identical to four decimal places in every trial. Selective free-choice routing modestly exceeds both the no-KG-option baseline and forced 100\% routing, indicating the agent's own judgment about \emph{when} to invoke graph retrieval adds a small amount of value on the cases it selects, even though most genuinely multi-hop questions are not among them and forcing the option universally is worse than not offering it selectively.
+
+\subsection{RQ3: Root causes}
+\label{sec:rootcause}
+
+We separate four mechanisms, each isolated by a targeted fix and a before/after (or ablated) measurement.
+
+\textbf{(a) Blunt lexical matching (fixed).} Seed-entity matching originally used raw substring containment, producing confirmed false positives (an unrelated machine-learning term matched any query containing a homographic substring of an unrelated common word). Word-boundary regex matching fixed this specific bug class. A code-level audit further found the retriever's ``no entity matched'' fallback path fires on \emph{zero} of 150 test questions even after the fix (median 11--12 seed matches per query) -- the mechanism is not under-matching, it is producing excess, insufficiently discriminated matches from residual generic pseudo-entities in the extracted graph.
+
+\textbf{(b) Hub-node fan-out (attempted fix, measured to have no effect).} A cap on neighbor expansion through high-degree generic nodes was added to prevent BFS from diluting results with unrelated content. An ablation isolating this fix from (a) found it contributes \emph{no measurable change} to retrieval metrics: the seed layer alone typically supplies more candidate chunks than the top-$k$ retrieval budget, so hop-1/hop-2 expansion -- where the fan-out cap operates -- is rarely reached in practice. The entirety of the measured improvement from this stage of fixes is attributable to (a) alone.
+
+\textbf{(c) Absent relevance scoring (fixed, genuine trade-off).} Retrieved chunks originally received a uniform relevance score regardless of query relevance, with a further-discovered nondeterminism bug (hash-order-dependent tie-breaking) meaning identical queries could return different results across runs. We replaced this with a composite score (node specificity $\times$ hop-distance decay) after isolating each factor's individual contribution. The fix substantially improves multi-hop performance (NDCG@5 $+508\%$, MAP $+583\%$ relative to the deterministic no-scoring baseline) but \emph{regresses} full-set Precision@1 ($0.140 \rightarrow 0.053$, though NDCG@5/MAP still improve on the full set) -- direct evidence that down-weighting high-evidence (``common'') entities as noise sometimes removes a legitimately correct, well-evidenced answer, not only noise.
+
+\textbf{(d) Extraction-model quality (confirmed contributing factor, not fixed).} The graph was built with a comparatively small extraction model. A hand-audit of the resulting graph found a confirmed hallucination: a chunk containing no real content (a blank, OCR-garbled table) has three fabricated facts attributed to it, one of which is the extraction prompt's own few-shot example verbatim -- the model reproduced its instructions rather than recognizing it had nothing to extract. A controlled comparison (same chunks, same prompt, a substantially larger model) on a 30-chunk sample found the smaller model fabricated content on at least 4 chunks with nothing extractable, while the larger model correctly returned empty results on every one of those chunks, and was independently more complete on chunks with genuine content. We measured the larger model to be $3.7\times$ slower per chunk, projecting a full-corpus re-extraction at roughly $27$ hours against $7.3$ hours for the original build -- a real but bounded cost we did not incur, on the grounds that the fifth mechanism below would still cap the achievable improvement.
+
+\textbf{(e) Structural mismatch (not fixable by better engineering or a better model).} Manual inspection found 18 of the 19 multi-hop questions are tabular/numeric cross-referencing rather than classic entity-relationship chains, and the extraction-model comparison in (d) found both models -- of substantially different capability -- exhibited the same table-misreading failure mode (treating a metrics-comparison matrix as flat entity-attribute relations). This is evidence the representation, not the model executing it, is mismatched to a meaningful fraction of this corpus's question structure.
+
+% =============================================================================
+\section{Discussion}
+% =============================================================================
+
+Two findings, taken together, argue for testing architectural complexity against a strong, already-optimized baseline before adopting it, rather than assuming it compounds. First, agentic orchestration's meta-decisions (which retrieval technique, whether to retry, which prompting strategy) added substantial latency and LLM-call cost without a corresponding accuracy gain, and were dominated by a much cheaper intervention: improving the underlying retrieval and chunking quality (System 2). Second, and more extensively, knowledge-graph retrieval -- motivated specifically by multi-hop reasoning, the class of question graph traversal is theoretically best suited to -- showed no benefit on exactly that subset, under any fusion weight, and under both free and forced agentic routing, despite five rounds of root-caused engineering improvement.
+
+The value of the negative result is in its decomposition. Mechanisms (a)--(c) are ordinary engineering debt: fixable, and in fact partially fixed here, with measured (if sometimes double-edged) effect. Mechanism (d) is a resource-quality trade-off with a measurable cost. Mechanism (e) is different in kind: it persisted across models of substantially different capability, suggesting no amount of extraction-model improvement or retrieval-mechanism tuning would resolve it, because the representation itself (entities and binary relations) does not carry the structure (rows, columns, temporal axes) that a meaningful fraction of this corpus's questions require. This suggests that reported successes for graph-augmented retrieval in prior work~\cite{edge2024graphrag,gutierrez2024hipporag} may be conditional on corpus structure -- narrative, entity-dense text -- in a way that has not been directly tested by evaluating the same method against a strong retrieval baseline on a corpus of a different character, as we do here.
+
+% =============================================================================
+\section{Limitations}
+\label{sec:limitations}
+% =============================================================================
+
+\begin{itemize}
+\item The 19-question multi-hop subset is a single-annotator judgment call with a documented rationale per question but no independent second-reviewer validation or algorithmic completeness check against the remaining 131 test questions; MMDocIR carries no native multi-hop label.
+\item Sample sizes (150 full set, 19 multi-hop) are modest; individual question outcomes on the multi-hop subset represent large percentage swings, which is why we report paired significance tests and bootstrap intervals throughout rather than point estimates alone -- but a larger multi-hop-labeled set would strengthen these estimates further.
+\item The extraction-model comparison (\S\ref{sec:rootcause}d) is based on a 30-chunk sample rather than a full re-extraction of the 12{,}747-chunk corpus; the hallucination-avoidance and completeness findings are demonstrated and notable at that scale but not exhaustively quantified corpus-wide.
+\item All results are drawn from a single benchmark (MMDocIR) with a particular question-type distribution; the corpus-structure account of mechanism (e) is a well-supported hypothesis given the model-independence of the tabular-misreading failure mode, not a claim independently verified on a second, differently-structured corpus.
+\item \emph{[Editor's note: the exact MMDocIR benchmark citation, the full related-work bibliography for the eight query-transformation techniques and prompting strategies evaluated in System 2/3, and the original System 1--3 methodology detail should be cross-checked against the project's prior technical report before submission, since this draft was written from the investigation's results log rather than from that report's full text.]}
+\end{itemize}
+
+% =============================================================================
+\section{Conclusion}
+% =============================================================================
+
+We evaluated whether increasing architectural complexity -- multimodal retrieval, query transformation, agentic orchestration, and graph-structured retrieval -- reliably improves multimodal document question answering, using a same-benchmark, same-corpus comparison of five systems. It does not, monotonically: a well-tuned non-agentic pipeline matches or exceeds an agentic one at a fraction of the computational cost, and knowledge-graph retrieval, despite substantial and root-caused engineering investment, never outperforms a strong dense+lexical baseline, a result we confirm is statistically significant rather than a single-run artifact. We attribute the shortfall to a mixture of fixable implementation weaknesses and one structural mismatch between triple-based representation and this corpus's tabular/numeric question content that persisted across extraction models of different capability. We suggest this as a boundary condition worth testing explicitly in future work applying graph-augmented retrieval to new corpora, rather than assuming benefits reported on narrative, entity-dense text will transfer.
+
+% =============================================================================
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}

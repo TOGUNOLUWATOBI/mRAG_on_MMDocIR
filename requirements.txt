@@ -9,8 +9,11 @@ FlagEmbedding==1.2.11
 einops
 open_clip_torch
 
-# Vector DB
+# Vector DB (kept for existing pipelines)
 qdrant-client
+
+# Knowledge Graph
+networkx
 
 # Retrieval
 rank-bm25

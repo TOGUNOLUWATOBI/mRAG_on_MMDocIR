@@ -6,11 +6,18 @@ from typing import Literal, List, Optional
 
 class QueryRewriterDecision(BaseModel):
     """Structured output from query rewriter agent."""
-    # Define the technique as a literal of the 8 techniques
+    # Define the technique as a literal of the 8 System 2 techniques, plus the
+    # opt-in Epic 5 "kg_multihop" technique (AgenticConfig.ENABLE_KG_ROUTING).
+    # Bug found via Tier 1's forced-routing control: without "kg_multihop" listed
+    # here, even a genuine LLM choice of it would fail Pydantic validation, get
+    # silently caught by query_rewriter_node's except-block, and get miscounted
+    # as a parsing error falling back to "standard" — never actually surfacing as
+    # a real kg_multihop selection.
     technique: Literal[
         "standard", "multi_query", "rag_fusion", "step_back",
-        "hyde", "query_decomposition", "query_rewriting", "query_expansion"
-    ] = Field(description="Which QueryTechnique to apply (one of 8 System 2 techniques)")
+        "hyde", "query_decomposition", "query_rewriting", "query_expansion",
+        "kg_multihop"
+    ] = Field(description="Which QueryTechnique to apply (8 System 2 techniques, or kg_multihop if KG routing is enabled)")
     
     # Reasoning for the choice of query technique
     reasoning: str = Field(description="Why this technique?")

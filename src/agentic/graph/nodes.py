@@ -128,36 +128,70 @@ def make_query_rewriter_node(agent_llm, retriever, query_techniques_dict, config
         if last_technique:
             print(f"Last technique (to avoid on retry): {last_technique}")
         
-        # Create technique descriptions
-        techniques_info = {
-            "standard": "baseline retrieval (use when question is clear and well-formed)",
-            "multi_query": "multiple paraphrases (use when question can be asked multiple ways)",
-            "rag_fusion": "paraphrases with fusion (use when you need to combine results from multiple reformulations)",
-            "step_back": "abstract to broader concept (use when question is too specific and needs foundational context)",
-            "hyde": "hypothetical documents (use when searching for rare/niche information)",
-            "query_decomposition": "break into sub-questions (use when question has multiple parts or compound structure)",
-            "query_rewriting": "improve phrasing (use when question has grammar issues, unclear wording, or lacks structure)",
-            "query_expansion": "add synonyms (use when question uses domain-specific/niche terminology)"
-        }
-        
-        # On retry, add clear warning about last technique
-        if last_technique and retry_count > 0:
-            avoid_instruction = f"\nMUST AVOID: '{last_technique.upper()}' was already tried and failed. Choose a DIFFERENT technique.\n"
-            strategy_note = f"Since {last_technique} didn't work, try a fundamentally different approach."
+        # Forced-routing control (see KG_ROADMAP.md): bypasses the LLM decision
+        # entirely when set, to isolate "does routing to a technique help" from
+        # "does the agent choose to route there" — Epic 5 found the agent never
+        # once chose kg_multihop freely, so its effect was never measured.
+        force_technique = config.get('FORCE_TECHNIQUE')
+        if force_technique and force_technique in query_techniques_dict:
+            print(f"FORCED technique: {force_technique} (bypassing agent LLM decision)")
+            decision = QueryRewriterDecision(
+                technique=force_technique,
+                reasoning=f"forced via FORCE_TECHNIQUE config override",
+                rewritten_queries=[question]
+            )
         else:
-            avoid_instruction = ""
-            strategy_note = ""
-        
-        # Build technique list description
-        technique_list = "\n".join([
-            f"- {name}: {desc}"
-            for name, desc in techniques_info.items()
-            if not (last_technique and name.lower() == last_technique.lower() and retry_count > 0)
-        ])
-        
-        
-        # Build prompt for LLM to decide which query technique to use
-        prompt = f"""You are deciding which query technique to use for information retrieval.
+            # Create technique descriptions
+            techniques_info = {
+                "standard": "baseline retrieval (use when question is clear and well-formed)",
+                "multi_query": "multiple paraphrases (use when question can be asked multiple ways)",
+                "rag_fusion": "paraphrases with fusion (use when you need to combine results from multiple reformulations)",
+                "step_back": "abstract to broader concept (use when question is too specific and needs foundational context)",
+                "hyde": "hypothetical documents (use when searching for rare/niche information)",
+                "query_decomposition": "break into sub-questions (use when question has multiple parts or compound structure)",
+                "query_rewriting": "improve phrasing (use when question has grammar issues, unclear wording, or lacks structure)",
+                "query_expansion": "add synonyms (use when question uses domain-specific/niche terminology)"
+            }
+            # Epic 5 (opt-in): only offered when KG routing was successfully built for this pipeline
+            if "kg_multihop" in query_techniques_dict:
+                techniques_info["kg_multihop"] = (
+                    "knowledge-graph traversal + dense + BM25 (use for multi-hop/relational questions that "
+                    "require chaining facts across multiple distinct entities — e.g. find an entity or value in "
+                    "one place, then look up a related fact about it elsewhere, or cross-reference two separate "
+                    "tables/figures on a shared attribute)"
+                )
+
+            # On retry, add clear warning about last technique
+            if last_technique and retry_count > 0:
+                avoid_instruction = f"\nMUST AVOID: '{last_technique.upper()}' was already tried and failed. Choose a DIFFERENT technique.\n"
+                strategy_note = f"Since {last_technique} didn't work, try a fundamentally different approach."
+            else:
+                avoid_instruction = ""
+                strategy_note = ""
+
+            # Build technique list description
+            technique_list = "\n".join([
+                f"- {name}: {desc}"
+                for name, desc in techniques_info.items()
+                if not (last_technique and name.lower() == last_technique.lower() and retry_count > 0)
+            ])
+
+
+            # Epic 5/7 (opt-in): disambiguate kg_multihop from query_decomposition —
+            # without this, "chaining facts across entities" and "compound wording"
+            # both sound like they could mean the same technique. query_decomposition
+            # still resolves everything itself (multiple retrievals over the SAME
+            # underlying dense+BM25 index); kg_multihop is the one that can actually
+            # look up a DIFFERENT fact once the first is resolved, via graph traversal.
+            kg_guidance = (
+                "\n- Chaining facts across 2+ distinct entities/tables/figures (must resolve "
+                "fact A elsewhere before fact B is answerable, not just compound wording) → "
+                "kg_multihop, NOT query_decomposition"
+                if "kg_multihop" in query_techniques_dict else ""
+            )
+
+            # Build prompt for LLM to decide which query technique to use
+            prompt = f"""You are deciding which query technique to use for information retrieval.
 
 Question: {question}
 Attempt: {retry_count + 1}{avoid_instruction}
@@ -171,7 +205,7 @@ Selection Guidance:
 - Multi-part questions (with "and") → query_decomposition or query_expansion
 - Complex/abstract questions → step_back
 - Rare/niche topics → hyde or query_expansion
-- Poorly worded questions → query_rewriting
+- Poorly worded questions → query_rewriting{kg_guidance}
 
 {strategy_note}
 
@@ -180,23 +214,23 @@ CRITICAL: Your response MUST be ONLY a valid JSON object:
 
 Do NOT include any text before or after the JSON, no code blocks, no extra text.
 Choose a technique name from the list above."""
-        
-        # Call agent LLM to get a decision on which query technique to use
-        try:
-            response = agent_llm.invoke(prompt)
-            response_text = response.content if hasattr(response, 'content') else str(response)
-            
-            # Try to parse as JSON
-            decision_dict = clean_and_extract_json(response_text)
-            decision = QueryRewriterDecision(**decision_dict)
-            
-        except Exception as e:
-            print(f"Failed to parse LLM decision: {e}, falling back to 'standard'")
-            decision = QueryRewriterDecision(
-                technique="standard", # Default to standard if parsing fails
-                reasoning="Error in parsing, using baseline",
-                rewritten_queries=[question]
-            )
+
+            # Call agent LLM to get a decision on which query technique to use
+            try:
+                response = agent_llm.invoke(prompt)
+                response_text = response.content if hasattr(response, 'content') else str(response)
+
+                # Try to parse as JSON
+                decision_dict = clean_and_extract_json(response_text)
+                decision = QueryRewriterDecision(**decision_dict)
+
+            except Exception as e:
+                print(f"Failed to parse LLM decision: {e}, falling back to 'standard'")
+                decision = QueryRewriterDecision(
+                    technique="standard", # Default to standard if parsing fails
+                    reasoning="Error in parsing, using baseline",
+                    rewritten_queries=[question]
+                )
         
         print(f"Chose technique: {decision.technique}")
         print(f"Reasoning: {decision.reasoning}")

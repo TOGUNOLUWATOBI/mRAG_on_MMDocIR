@@ -1,0 +1,505 @@
+{
+  "baseline_p1_count": 95,
+  "hybrid_p1_count": 73,
+  "kg_p1_count": 8,
+  "rescued_by_hybrid": [
+    [
+      4,
+      "Which email should an exchange student contact for housing matters?"
+    ],
+    [
+      46,
+      "In the pipeline diagram of the RAR model, which type of organism is used as the input case?"
+    ],
+    [
+      57,
+      "For the users with the safety approval of UL Listed and CSA , what is the second bullet point for safety?"
+    ],
+    [
+      101,
+      "As of Q3 2015, is vietnam's adoption rate of iOS 9 higher or lower than a global average rate? What is the difference in percentage?"
+    ],
+    [
+      104,
+      "What models of cars are introduced on pages 10 and 11?"
+    ]
+  ],
+  "hurt_by_hybrid": [
+    [
+      9,
+      "What is the name of the company that created this presentation?"
+    ],
+    [
+      19,
+      "One kind of gas is the siginificant contributor to climate change. What are the top 3 countries that produces this gas most?"
+    ],
+    [
+      34,
+      "How many times does \"HIT\" appear in slide?"
+    ],
+    [
+      35,
+      "What were the GDP growth amounts for the first and second quarters respectively?"
+    ],
+    [
+      42,
+      "For the papers that adopted the Model Debate strategy in Table 2, how many of them are not mentioned in Section 3.4? Write the answer in float format."
+    ],
+    [
+      49,
+      "How many distinct button functions are there during a workout?"
+    ],
+    [
+      50,
+      "How many quizzes are there in units 4, 5, and 6 combined?"
+    ],
+    [
+      58,
+      "What is the sight near Austin St?"
+    ],
+    [
+      59,
+      "which age group experienced the greatest change in the percentage holding an \"unfavorable\" opinion of China between 2005 and 2010?"
+    ],
+    [
+      60,
+      "How to prepare for Tomorrow's Workplace Skills for QUARTER 3? "
+    ],
+    [
+      65,
+      "How many languages are shown in the in-context examples for multi-lingual translation query?"
+    ],
+    [
+      68,
+      "How many subfigures are in Figure 3?"
+    ],
+    [
+      76,
+      "How many geographic market names are listed under Los Angeles area?"
+    ],
+    [
+      81,
+      "Which individual lead this program?"
+    ],
+    [
+      82,
+      "what is the FY2015 unadjusted EBITDA % margin for Netflix?Answer in percentage term, round to one decimal place."
+    ],
+    [
+      83,
+      "How many schools from College of Humanities, Arts, and Social Sciences are not individually introduced in detail?"
+    ],
+    [
+      95,
+      "How many days are recommended for the \"top itineraries\"?"
+    ],
+    [
+      97,
+      "What is the average session duration for desktop?"
+    ],
+    [
+      113,
+      "what is long-term debt of  Costco in FY 2021? Anwser in millions."
+    ],
+    [
+      115,
+      "what is advertsing expense to sales ratio of Neflix in FY 2015? Round your answer to three decimal places."
+    ],
+    [
+      119,
+      "WHAT IS THE 2nd OBJECTIVE OF REGULATORY EFFICIENCY?"
+    ],
+    [
+      120,
+      "What is the difference in total volume between the rank 1 and rank 19 top albums?"
+    ],
+    [
+      121,
+      "Which dataset used in this paper was proposed in 2022 and all of its logical reasoning problems are multiple-choice questions with 5 options?"
+    ],
+    [
+      124,
+      "what method did netflix use to pay the dividend to shareholders in FY2015."
+    ],
+    [
+      128,
+      "What is the button to click for up-to-the-minute portfolio balances?"
+    ],
+    [
+      137,
+      "what is the email id of the mtre laurent nahmiash ?"
+    ],
+    [
+      149,
+      "Assume that after July 2020, the percentage of Republicans who believe \"China is an enemy of the U.S.\" increased by 10 percentage points, while the percentage of Democrats remained the same.  What would be the difference in the percentage between Republicans and Democrats at that time?"
+    ]
+  ],
+  "rescued_by_kg": [
+    [
+      8,
+      "How many social media accounts does NTU have?"
+    ],
+    [
+      90,
+      "Among the most important applications listed, which one is shown a picture of the interface as an example"
+    ]
+  ],
+  "hurt_by_kg": [
+    [
+      1,
+      "How many times does \"Barclays\" appear on page 4?"
+    ],
+    [
+      3,
+      "What part of the esophagus is just3 above the cardioesophageal junction as seen in the figure?"
+    ],
+    [
+      5,
+      "What is  cash conversion cycle in FY2021 for Nike? Round your answer to two decimal places."
+    ],
+    [
+      6,
+      "What is common equity  for COSTCO in FY2021? "
+    ],
+    [
+      7,
+      "What are two examples of reflecting surfaces?"
+    ],
+    [
+      9,
+      "What is the name of the company that created this presentation?"
+    ],
+    [
+      12,
+      "In the United States, which group has the highest proportion of people who believe that the U.S. will have less influence in world affairs after the coronavirus outbreak compared to before the outbreak?"
+    ],
+    [
+      13,
+      "How many outputs does the example ECU have?"
+    ],
+    [
+      17,
+      "In Figure 122, what's the colour of OSCARb in the prompt?"
+    ],
+    [
+      18,
+      "What is the color on the watch that shows the aerobic zone?"
+    ],
+    [
+      19,
+      "One kind of gas is the siginificant contributor to climate change. What are the top 3 countries that produces this gas most?"
+    ],
+    [
+      20,
+      "what value stock does Activsion Blizzard repurchase in FY2019?Answer in USD billion\n"
+    ],
+    [
+      21,
+      "What is total long-term Liabilities for COSTCO in FY 2021? Anwser in millions"
+    ],
+    [
+      24,
+      "How many tables include \"F1\" as a metric?"
+    ],
+    [
+      25,
+      "Enumerate all chapter names (for example, Sharp divides in German and American views of security issues, from use of force to defense budgeting) that discussed the relationship between Germany or the U.S. with NATO. Your answer should be a list."
+    ],
+    [
+      27,
+      "Which stages of casting a tunnel framework require a heater?"
+    ],
+    [
+      28,
+      "List the top-3 error types over 150 annotated GPT-4V errors in Figure 6"
+    ],
+    [
+      29,
+      "WHAT IS ITC LIMITED LOGO COLOR?"
+    ],
+    [
+      30,
+      "Using anchor-only context compression, how much can GPT2-XL speed up on AGNews?"
+    ],
+    [
+      32,
+      "What are the HIT applications?"
+    ],
+    [
+      34,
+      "How many times does \"HIT\" appear in slide?"
+    ],
+    [
+      35,
+      "What were the GDP growth amounts for the first and second quarters respectively?"
+    ],
+    [
+      37,
+      "How much shares did COSTCO repurchase in FY2021?"
+    ],
+    [
+      38,
+      "In the year when 58% of people thought it was too early to tell if Trump was a successful president, how many people believed that his economic policies had not much effect on the economic situation?"
+    ],
+    [
+      39,
+      "what profit  did Memberships contribute to in Domestic Streaming Segment in FY2015? Answer in thousands."
+    ],
+    [
+      41,
+      "I want to see a doctor in the campus hospital.  After registering at the registration area, what is the next step?"
+    ],
+    [
+      42,
+      "For the papers that adopted the Model Debate strategy in Table 2, how many of them are not mentioned in Section 3.4? Write the answer in float format."
+    ],
+    [
+      43,
+      "According to the PDF source, what is the telephone number of Prime Taxi?"
+    ],
+    [
+      47,
+      "In the survey conducted May 1-15, 2017, what percentage of U.S. adults says the number of people killed or injured in traffic accidents will not decrease if driverless vehicles become widespread?"
+    ],
+    [
+      48,
+      "What is the highest hit rate number in the dataset for the personality located furthest to the left in the distribution of personality traits figure?"
+    ],
+    [
+      49,
+      "How many distinct button functions are there during a workout?"
+    ],
+    [
+      50,
+      "How many quizzes are there in units 4, 5, and 6 combined?"
+    ],
+    [
+      51,
+      "What's the color of the 'loss_cls' line in the loss curve image?"
+    ],
+    [
+      53,
+      "what is advertsing expense of Neflix in FY 2015? Answer in millions"
+    ],
+    [
+      55,
+      "Write down the pseudo code from appendix that corresponds to step 5 of the tree traversal method"
+    ],
+    [
+      58,
+      "What is the sight near Austin St?"
+    ],
+    [
+      59,
+      "which age group experienced the greatest change in the percentage holding an \"unfavorable\" opinion of China between 2005 and 2010?"
+    ],
+    [
+      60,
+      "How to prepare for Tomorrow's Workplace Skills for QUARTER 3? "
+    ],
+    [
+      64,
+      "What is receive turnover in FY2021 for Nike? Round your answer to two decimal places."
+    ],
+    [
+      65,
+      "How many languages are shown in the in-context examples for multi-lingual translation query?"
+    ],
+    [
+      67,
+      "Which model performs the best on Cladder?"
+    ],
+    [
+      68,
+      "How many subfigures are in Figure 3?"
+    ],
+    [
+      69,
+      "How many incorrect postures of measuring blood pressure are demostrated if this guidebook?"
+    ],
+    [
+      71,
+      "How many quizzes are there in the entire course?"
+    ],
+    [
+      72,
+      "What is the color of the personality vector in the soft-labled  personality embedding matrix that with the highest Receptiviti score for User A2GBIFL43U1LKJ?"
+    ],
+    [
+      73,
+      "According to the Pew Research Center 2015 National Survey of Latinos, what is the percentages of Foreign born Latinos most often uses the name of their origin country to describe themselves?"
+    ],
+    [
+      74,
+      "What is the Source of the data for the audience of the platform whose metrics are page likes, post clicks, video views, post reach, hide, report as spam, unlikes, 30-second views++, post types, engagement: reactions, shares, comments, and FB referral traffic?"
+    ],
+    [
+      75,
+      "How many 65+ age group people go online 3-5 times per week or Every day in the Pew Research Center\u2019s Internet Project July 18-September 30, 2013 tracking survey?"
+    ],
+    [
+      76,
+      "How many geographic market names are listed under Los Angeles area?"
+    ],
+    [
+      77,
+      "Among Republicans, which age group has the highest proportion of support for making Election Day a national holiday?"
+    ],
+    [
+      78,
+      "What is the performance of the InstructGPT model with Self-Ask in the closed-book setting on the dataset with the highest ProgramFC retrieval recall at 10? Please write down the answer in float format with 1 decimal."
+    ],
+    [
+      79,
+      "what is R&D to asset ratio for Activision Blizzard in FY 2019? "
+    ],
+    [
+      80,
+      "How many weeks do students need to reach work experience milestone and get 8 units?"
+    ],
+    [
+      81,
+      "Which individual lead this program?"
+    ],
+    [
+      82,
+      "what is the FY2015 unadjusted EBITDA % margin for Netflix?Answer in percentage term, round to one decimal place."
+    ],
+    [
+      83,
+      "How many schools from College of Humanities, Arts, and Social Sciences are not individually introduced in detail?"
+    ],
+    [
+      88,
+      "In the demostration of how to use a Knuckle to Take a Scrolling Screenshot, what buildings appear in the first picture?"
+    ],
+    [
+      91,
+      "What's the geographic market name for EPS Code AR01?\n\n"
+    ],
+    [
+      92,
+      "How many parts are introduced of the headset including their locations and functions? "
+    ],
+    [
+      93,
+      "List the areas that PWC performs IA support across."
+    ],
+    [
+      95,
+      "How many days are recommended for the \"top itineraries\"?"
+    ],
+    [
+      97,
+      "What is the average session duration for desktop?"
+    ],
+    [
+      99,
+      "How many strategies outperform the random selection baseline on CIFAR-10-LT?"
+    ],
+    [
+      105,
+      "Which Hispanic origin group in the United States is most likely to vote for Republican candidate for the U.S. House of Representatives in their district and to say Trump should run for president in 2024?"
+    ],
+    [
+      106,
+      "When was the last serious shock recorded in the table? The answer needs to be accurate to the year, month, day, hour, and minute. For example: 1883 Dec.7, 2 8 p.m."
+    ],
+    [
+      108,
+      "List all titles of the charts (for example, Americans and Germans diverge sharply in their views of bilateral relations) in which the results are grouped by political affiliation."
+    ],
+    [
+      109,
+      "what percentage did Global streaming memberships increase from 2014 to 2015?Answer in percentage term, round to one decimal places."
+    ],
+    [
+      111,
+      "How many more claims does the Wiki Table datasets have comparing to scientific articles datasets? Please writeh the answer in int format. "
+    ],
+    [
+      113,
+      "what is long-term debt of  Costco in FY 2021? Anwser in millions."
+    ],
+    [
+      115,
+      "what is advertsing expense to sales ratio of Neflix in FY 2015? Round your answer to three decimal places."
+    ],
+    [
+      116,
+      "what is Interest Coverage Ratio for Activsion Blizzard In F2019?"
+    ],
+    [
+      117,
+      "How many people who do not go online or only use SNS in the Older Adults and Technology by Princeton Survey Research Associates International from July 18 to September 30, 2013?"
+    ],
+    [
+      119,
+      "WHAT IS THE 2nd OBJECTIVE OF REGULATORY EFFICIENCY?"
+    ],
+    [
+      120,
+      "What is the difference in total volume between the rank 1 and rank 19 top albums?"
+    ],
+    [
+      125,
+      "what is EBITDA  for costco in FY2021?"
+    ],
+    [
+      128,
+      "What is the button to click for up-to-the-minute portfolio balances?"
+    ],
+    [
+      129,
+      "How many more millions of dollars was the median exit valuation in the USA compared to Europe at the time of the presentation?"
+    ],
+    [
+      131,
+      "What service specifications are associated with the SRM Component of Information Sharing?"
+    ],
+    [
+      133,
+      "A transmitter operating at a frequency of 500 MHz has a rated maximum output power of 10 W. Using the recommended separation distances between portable and mobile RF communications equipment and the M270TF-XXX / M320TF-XXX, calculate the minimum separation distance required for this transmitter. Write down the answer in float format with 2 decimals."
+    ],
+    [
+      134,
+      "According to this report,  what percentage of Germany respondent view China or Japan as the top economic power? Give me a percantage value."
+    ],
+    [
+      135,
+      "Which two magazines' opinions are selected to illustrate the situation of German venture capital?"
+    ],
+    [
+      137,
+      "what is the email id of the mtre laurent nahmiash ?"
+    ],
+    [
+      139,
+      "According to the survry,  what's the absolute percent change of dem/lean dem respondents viewing China's growing military power a very serious threat from 2020 to 2021?"
+    ],
+    [
+      140,
+      "Does llama-1 apply qknorm? Directly answer 'yse' or 'no'"
+    ],
+    [
+      141,
+      "What is the most confusing category of Abbreviation?"
+    ],
+    [
+      142,
+      "How many chapters are in this report?"
+    ],
+    [
+      145,
+      "What is the percentage difference between the proportion of people who are very confident in Trump's ability to make wise decisions about immigration policy and those who are not confident at all?"
+    ],
+    [
+      146,
+      "what's the topic of UNIT 14?"
+    ],
+    [
+      149,
+      "Assume that after July 2020, the percentage of Republicans who believe \"China is an enemy of the U.S.\" increased by 10 percentage points, while the percentage of Democrats remained the same.  What would be the difference in the percentage between Republicans and Democrats at that time?"
+    ]
+  ]
+}

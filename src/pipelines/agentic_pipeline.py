@@ -3,14 +3,18 @@ import time
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Union
 
-from config.config import AdvancedConfig, AgenticConfig
+from config.config import AdvancedConfig, AgenticConfig, KGConfig
 from pipelines.base_pipeline import BaseRAGPipeline
 from agentic.graph.builder import build_agentic_graph
 from agentic.graph.state import AgenticRAGState
 from query_techniques import get_query_technique
+from query_techniques.kg_multihop import KGMultihopRetrieval
 from retrieval_techniques import MultimodalRetriever
 from generation.generator import VisionGenerator
 from agentic.llm import SimpleLLM
+from indexing.kg_retriever import KGRetriever
+from indexing.kg_store import KGStore
+from indexing.hybrid_kg_retriever import HybridKGRetriever
 from evaluation.retrieval_metrics import evaluate_retrieval
 from evaluation.generation_metrics import evaluate_generation
 
@@ -29,6 +33,7 @@ class AgenticRAGPipeline(BaseRAGPipeline):
         self.agentic_graph = None       # Will hold the compiled LangGraph StateGraph
         self.agent_llm = None           # LLM for agent decision-making
         self.multimodal_retriever: Optional[MultimodalRetriever] = None  # Multimodal retriever for image-aware retrieval
+        self.kg_technique: Optional[KGMultihopRetrieval] = None  # Epic 5: optional KG-routing technique
         
     def initialize_components(self):
         """Initialize all components, including multimodal generator and multimodal retriever."""
@@ -72,10 +77,55 @@ class AgenticRAGPipeline(BaseRAGPipeline):
             base_url=self.config.OLLAMA_BASE_URL,
             model=self.config.AGENT_LLM_MODEL
         )
-        
+
         logger.info(f"Agent LLM initialized: {self.config.AGENT_LLM_MODEL}")
         logger.info(f"Generator LLM (multimodal if enabled): {self.config.LLM_MODEL}")
-    
+
+        # Epic 5 (opt-in): build the KG-routing technique
+        if getattr(self.config, "ENABLE_KG_ROUTING", False):
+            self._build_kg_technique()
+
+    def _build_kg_technique(self):
+        """
+        Build a HybridKGRetriever (KG traversal + dense + BM25) wrapped as a
+        'kg_multihop' QueryTechnique, reusing this pipeline's already-built
+        embedder/vector_db/chunks. Requires the KG graph's chunk UIDs
+        (pdf_name::chunk_id) to match self.chunks — i.e. the pipeline must be
+        configured with the same chunking source the KG graph was built from
+        (chunks_fixed_size.json / advanced_fixed_size). Logs and skips (rather
+        than crashing the whole pipeline) if the graph can't be loaded.
+        """
+        try:
+            kg_config = KGConfig()
+            graph, _ = KGStore.load(kg_config.KG_GRAPH_FILE)
+            kg_retriever = KGRetriever(
+                graph=graph,
+                chunks=self.chunks,
+                hops=kg_config.KG_HOPS,
+                min_seed_length=kg_config.KG_MIN_SEED_LENGTH,
+                max_fanout=kg_config.KG_MAX_FANOUT,
+                use_word_boundary_seeds=kg_config.KG_USE_WORD_BOUNDARY_SEEDS,
+            )
+            hybrid_kg_retriever = HybridKGRetriever(
+                kg_retriever=kg_retriever,
+                vector_db=self.vector_db,
+                embedder=self.embedder,
+                chunks=self.chunks,
+                kg_weight=getattr(self.config, "KG_ROUTING_HYBRID_KG_WEIGHT", 0.3),
+                dense_weight=getattr(self.config, "KG_ROUTING_HYBRID_DENSE_WEIGHT", 1.0),
+                bm25_weight=getattr(self.config, "KG_ROUTING_HYBRID_BM25_WEIGHT", 1.0),
+            )
+            self.kg_technique = KGMultihopRetrieval(
+                embedder=self.embedder,
+                retriever=hybrid_kg_retriever,
+                generator=self.generator,
+                config=self.config.QUERY_TECHNIQUE_CONFIG,
+            )
+            logger.info("KG routing enabled: 'kg_multihop' technique available to the query rewriter.")
+        except Exception as e:
+            logger.warning(f"Could not build KG routing technique, skipping: {e}")
+            self.kg_technique = None
+
     def _initialize_retriever(self):
         """Initialize hybrid retriever first (parent), then optionally build multimodal retriever."""
         super()._initialize_retriever()  # This builds self.hybrid_retriever
@@ -117,6 +167,11 @@ class AgenticRAGPipeline(BaseRAGPipeline):
             except Exception as e:
                 print(f"  [ERROR] Failed to load {technique_name}: {e}")
         
+        # Epic 5 (opt-in): add the KG-routing technique if it was built successfully
+        if self.kg_technique is not None:
+            techniques_dict['kg_multihop'] = self.kg_technique
+            print("  [OK] Loaded kg_multihop")
+
         print(f"Query techniques loaded: {list(techniques_dict.keys())}")
         return techniques_dict
     
@@ -142,6 +197,7 @@ class AgenticRAGPipeline(BaseRAGPipeline):
             'GRADER_CONFIDENCE_THRESHOLD': getattr(self.config, 'GRADER_CONFIDENCE_THRESHOLD', 0.6),
             'RETRY_ON_LOW_CONFIDENCE': getattr(self.config, 'RETRY_ON_LOW_CONFIDENCE', True),
             'AGENT_DECISION_LOGGING': getattr(self.config, 'AGENT_DECISION_LOGGING', True),
+            'FORCE_TECHNIQUE': getattr(self.config, 'FORCE_TECHNIQUE', None),
         }
         
         self.agentic_graph = build_agentic_graph( # Build the LangGraph StateGraph using the builder function, passing all dependencies

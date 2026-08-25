@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import os
 from dotenv import load_dotenv
 
@@ -219,6 +219,64 @@ class AdvancedConfig(BaselineConfig):
     """Enable answer format validation for string-comparison metrics (exact_match, contains_match, token_f1)"""
 
 @dataclass
+class KGConfig(BaselineConfig):
+    """Configuration for the Knowledge Graph RAG Pipeline."""
+
+    # Path where the serialized graph + chunks JSON will be saved/loaded
+    KG_GRAPH_FILE: str = str(DATA_DIR / "preprocessed" / "knowledge_graph.json")
+
+    # Number of BFS hops to expand from seed entities during retrieval
+    KG_HOPS: int = 2
+
+    # Minimum character length for an entity to be usable as a seed match.
+    # Extraction produces some single/double-character node labels ("N", "RE") that
+    # are noise, not real entities — they false-positive-match almost every query.
+    KG_MIN_SEED_LENGTH: int = 3
+
+    # Cap on neighbors expanded per node per BFS hop, keeping only the best-evidenced
+    # ones. Without this, generic high-degree hub nodes ("students", degree 200+)
+    # flood retrieval results with unrelated chunks within a single hop.
+    KG_MAX_FANOUT: int = 15
+
+    # Ablation switch only — set False to reproduce pre-Epic-3 raw-substring seed
+    # matching (isolates its contribution from KG_MAX_FANOUT's). Leave True.
+    KG_USE_WORD_BOUNDARY_SEEDS: bool = True
+
+    # Model used for triple extraction — text-only (not the VL model).
+    # llama3:8b is fast (~3-4s/chunk) and reliable for JSON extraction.
+    # Switch to "qwen3:32b" for higher-quality triples at the cost of speed.
+    KG_EXTRACTION_MODEL: str = "llama3:8b"
+
+    # KG uses graph traversal — hybrid BM25+dense retrieval is not applicable
+    USE_HYBRID_RETRIEVAL: bool = False
+
+
+@dataclass
+class HybridConfig(KGConfig):
+    """Configuration for the Hybrid KG + Dense + BM25 RAG Pipeline (System 5)."""
+
+    # Use the already-populated collection built from the same chunks_fixed_size.json
+    # the KG graph was built from, so the three signals are over identical chunks.
+    VECTOR_DB_COLLECTION: str = "advanced_fixed_size"
+
+    # Reciprocal Rank Fusion constant — higher values flatten rank differences
+    HYBRID_RRF_K: int = 60
+
+    # Each signal fetches top_k * multiplier candidates before fusion
+    HYBRID_CANDIDATE_MULTIPLIER: int = 10
+
+    # Per-signal RRF weights. KG traversal is empirically noisier than dense/BM25 on
+    # this corpus (see KG_ROADMAP.md Epic 4 findings) — equal weighting (1.0) let KG's
+    # noise outvote good dense/BM25 candidates and regressed P@1 from 0.59 (Baseline,
+    # no KG) to 0.35. Benchmarked 1.0 vs 0.3 vs 0.15 on the full 150-question set;
+    # 0.3 recovered most of that regression (P@1 0.49) without a further benchmark
+    # sweep to find an exact optimum — set as the default.
+    HYBRID_KG_WEIGHT: float = 0.3
+    HYBRID_DENSE_WEIGHT: float = 1.0
+    HYBRID_BM25_WEIGHT: float = 1.0
+
+
+@dataclass
 class AgenticConfig(AdvancedConfig):
     """Configuration for System 3 Agentic RAG Pipeline."""
     
@@ -236,3 +294,26 @@ class AgenticConfig(AdvancedConfig):
     """Whether to log all agent decisions (query rewriter, grader, generator) for analysis"""
     
     AGENT_LLM_MODEL: str = "qwen3-vl:8b-instruct"  # Lightweight LLM for agent decisions (Query Rewriter, Grader, Generator strategy)
+
+    # ===== KG ROUTING (Epic 5) =====
+    ENABLE_KG_ROUTING: bool = False
+    """
+    Opt-in: adds 'kg_multihop' as a 9th technique the query-rewriter agent can
+    select, routing multi-hop/relational questions through HybridKGRetriever
+    (KG traversal + dense + BM25) instead of the standard 8 dense-only
+    techniques. Requires the pipeline's chunking config to match the chunks
+    the KG graph was built from (chunks_fixed_size.json / advanced_fixed_size),
+    or the KG's chunk UIDs won't resolve. Off by default — existing Agentic
+    (System 3) behavior/benchmarks are unaffected unless explicitly enabled.
+    """
+    KG_ROUTING_HYBRID_KG_WEIGHT: float = 0.3
+    KG_ROUTING_HYBRID_DENSE_WEIGHT: float = 1.0
+    KG_ROUTING_HYBRID_BM25_WEIGHT: float = 1.0
+
+    # Forced-routing control: bypasses the query-rewriter agent's free 9-way
+    # technique choice entirely, always using the named technique instead. Exists
+    # to isolate "does routing to kg_multihop actually help" from "does the agent
+    # choose to route there" — Epic 5 found the agent chose kg_multihop 0/19 times
+    # on the multi-hop subset, so its effect (if any) was never measured. None
+    # (default) preserves normal agent free-choice behavior.
+    FORCE_TECHNIQUE: Optional[str] = None

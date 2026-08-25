@@ -13,6 +13,7 @@ A three-system Retrieval-Augmented Generation pipeline evaluated on the [MMDocIR
 - [Running the Pipeline](#running-the-pipeline)
 - [Configuration](#configuration)
 - [Evaluation Metrics](#evaluation-metrics)
+- [Results](#results)
 - [Reproducibility](#reproducibility)
 
 ---
@@ -24,6 +25,10 @@ A three-system Retrieval-Augmented Generation pipeline evaluated on the [MMDocIR
 | **System 1 — Baseline RAG** | Text-only | Jina CLIP v2 embeddings, Qdrant vector store, hybrid BM25 + dense retrieval, Ollama generation |
 | **System 2 — Advanced mRAG** | Multimodal | Adds page image, figure, and evidence crop retrieval; 8 query techniques; 5 chunking strategies; 4 prompting strategies |
 | **System 3 — Agentic mRAG** | Agent-based | LangChain & LangGraph StateGraph with query rewriter, grader, and generator agents; adaptive retry on low-confidence retrievals |
+| **System 4 — Knowledge-Graph RAG** | Graph traversal | NetworkX graph of (subject, relation, object) triples extracted via LLM from every chunk; entity-seed matching + BFS traversal replaces vector/keyword search entirely |
+| **System 5 — Hybrid (KG + Dense + BM25)** | Fusion | Reciprocal Rank Fusion of KG traversal, dense, and BM25 signals; per-signal weights, since KG's signal is noisier than the other two (see [Results](#results)) |
+
+> **Result up front:** Systems 4 and 5 were built and rigorously benchmarked, including on a hand-curated multi-hop subset they were specifically hypothesized to help — and neither beats System 1 (plain dense+BM25) on this corpus. See [Results](#results) and `KG_ROADMAP.md` for the full, quantified writeup; this is reported as a genuine negative finding, not a shortfall to gloss over.
 
 ### Architecture
 
@@ -78,14 +83,16 @@ Query → [Query_rewriter] → [Grader] ──(low confidence)──→ retry
 └── src/
     ├── main.py               # Entry point: System 1 & 2
     ├── main_agentic.py       # Entry point: System 3
+    ├── main_kg.py            # Entry point: System 4 (Knowledge Graph)
+    ├── main_hybrid.py        # Entry point: System 5 (Hybrid KG+Dense+BM25)
     ├── .env.example
     ├── docker-compose.yml    # Optional: Qdrant via Docker
     ├── config/
-    │   └── config.py         # BaselineConfig, AdvancedConfig, AgenticConfig
+    │   └── config.py         # BaselineConfig, AdvancedConfig, AgenticConfig, KGConfig, HybridConfig
     ├── data/
     │   ├── train/
     │   ├── test/
-    │   └── preprocessed/     # Cached chunk files (preprocessed-generated files)
+    │   └── preprocessed/     # Cached chunk files + knowledge_graph.json (preprocessed-generated files)
     ├── preprocessing/
     │   ├── pdf_loader.py     # Docling-based PDF extraction
     |   ├── build_multimodal_indexes.py
@@ -95,8 +102,12 @@ Query → [Query_rewriter] → [Grader] ──(low confidence)──→ retry
     ├── indexing/
     │   ├── embedder.py       # Jina CLIP v2 (text + image, 1024D)
     │   ├── vector_database.py
-    │   └── hybrid_retriever.py
-    ├── query_techniques/     # standard, multi_query, rag_fusion, hyde, step_back, ...
+    │   ├── hybrid_retriever.py     # BM25 + dense fusion (Systems 1-3)
+    │   ├── kg_builder.py           # LLM triple extraction → NetworkX DiGraph
+    │   ├── kg_store.py             # Graph (de)serialization
+    │   ├── kg_retriever.py         # Entity-seed matching + BFS traversal
+    │   └── hybrid_kg_retriever.py  # RRF fusion of KG + dense + BM25 (System 5)
+    ├── query_techniques/     # standard, multi_query, rag_fusion, hyde, step_back, ..., kg_multihop (Epic 5, opt-in)
     ├── retrieval_techniques/
     │   └── multimodal.py     # Image-aware retrieval routing
     ├── generation/
@@ -108,6 +119,9 @@ Query → [Query_rewriter] → [Grader] ──(low confidence)──→ retry
     │   ├── baseline_pipeline.py
     │   ├── advanced_pipeline.py
     │   ├── agentic_pipeline.py
+    │   ├── kg_pipeline.py           # System 4
+    │   ├── hybrid_kg_pipeline.py    # System 5
+    │   ├── kg_preprocessing_pipeline.py
     │   └── preprocessing_pipeline.py
     ├── agentic/
     │   ├── llm.py
@@ -123,7 +137,7 @@ Query → [Query_rewriter] → [Grader] ──(low confidence)──→ retry
     ├── utils/
     │   └── timer.py
     ├── notebooks/            # Exploration and debugging notebooks
-    └── results/              # CSV output from experiments
+    └── results/              # CSV/JSON output from experiments
 ```
 
 ---
@@ -528,9 +542,31 @@ You can also specify a `JSON` output file to store information and output, if fu
 
 ---
 
+### Step 4 — Run System 4 (Knowledge Graph) and System 5 (Hybrid)
+
+```bash
+cd src
+
+# System 4 — KG-only (graph traversal, no vector/keyword search)
+python main_kg.py --test-query "How many students of NTU would recommend studying at NTU?"
+python main_kg.py --eval --eval-size 150 --output results_kg.json
+
+# System 5 — Hybrid (KG + dense + BM25 via RRF)
+python main_hybrid.py --test-query "How many students of NTU would recommend studying at NTU?"
+python main_hybrid.py --eval --eval-size 150 --output results_hybrid.json
+```
+
+Both assume `src/data/preprocessed/knowledge_graph.json` already exists (it's committed — see [Data](#data)); pass `--rebuild-index` to re-extract triples from scratch via LLM (slow, ~8 hours over the full corpus). System 5 additionally requires the `advanced_fixed_size` Qdrant collection to be built (see [Step 1](#step-1--preprocessing-run-once)), since it fuses the same chunk source the KG graph was built from with dense + BM25 search.
+
+**Agentic + KG routing (Epic 5, opt-in):** `AgenticConfig.ENABLE_KG_ROUTING = True` adds a `kg_multihop` technique the query-rewriter agent can select for questions it judges to be multi-hop/relational, alongside its existing 8 techniques. Default is `False`; enabling it does not change System 3's existing benchmarked behavior unless a question actually gets routed there.
+
+*See [Results](#results) below for how Systems 4 and 5 actually performed — including on the multi-hop questions they were built to help with.*
+
+---
+
 ## Configuration
 
-All settings live in `src/config/config.py`. Three config classes are available: `BaselineConfig` (System 1), `AdvancedConfig` (System 2), `AgenticConfig` (System 3).
+All settings live in `src/config/config.py`. Config classes are available for each system: `BaselineConfig` (System 1), `AdvancedConfig` (System 2), `AgenticConfig` (System 3), `KGConfig` (System 4), `HybridConfig` (System 5).
 
 ### Selecting a Chunking Strategy & Collection
 
@@ -582,6 +618,11 @@ python main.py --run-experiments --technique rag_fusion --force-rebuild
 | `LLM_TEMPERATURE` | `0.0` | Generation temperature (reduce hallucination) |
 | `AGENT_MAX_RETRIES`| `1` | Specify number of retry-attempts available |
 | `GRADER_CONFIDENCE_THRESHOLD`| `0.51` | Specify retry confidence threshold |
+| `KG_HOPS` | `2` | BFS hops from seed entities during KG traversal (System 4/5) |
+| `KG_MIN_SEED_LENGTH` | `3` | Minimum entity-name length usable as a seed match |
+| `KG_MAX_FANOUT` | `15` | Cap on neighbors expanded per node per hop (keeps best-evidenced only) |
+| `HYBRID_KG_WEIGHT` | `0.3` | RRF weight for the KG signal in System 5 (down-weighted — see [Results](#results)) |
+| `ENABLE_KG_ROUTING` | `False` | Agentic-only: let the query-rewriter select `kg_multihop` for multi-hop questions |
 ---
 
 ## Evaluation Metrics
@@ -612,12 +653,52 @@ python main.py --run-experiments --technique rag_fusion --force-rebuild
 
 ---
 
+## Results
+
+Systems 1–3's numbers below are from the submitted report (`DAT560_Group6_report.pdf`, Tables 6–7), evaluated on the full 150-question test set. Systems 4 and 5 were run fresh under the same conditions (same LLM, same 150 questions) — see `KG_ROADMAP.md` for full methodology, per-fix re-benchmarks, and reasoning.
+
+### Full test set (150 questions)
+
+| System | P@1 | NDCG@5 | MAP | Token F1 | Exact Match |
+|---|---|---|---|---|---|
+| System 1 — Baseline | 0.5933 | 0.6693 | 0.6478 | 0.1837 | 0.1333 |
+| System 2 — Advanced | **0.8667** | **0.9043** | **0.8944** | **0.2658** | **0.2067** |
+| System 3 — Agentic | 0.6066 | 0.6695 | 0.6544 | 0.1674 | 0.1133 |
+| System 4 — KG-only | 0.0467 | 0.1734 | 0.1318 | 0.0325 | 0.0133 |
+| System 5 — Hybrid (KG weighted 0.3x) | 0.4933 | 0.6300 | 0.5908 | 0.1688 | 0.1133 |
+
+### Multi-hop subset (19 hand-picked questions — chained facts across multiple entities/tables/figures)
+
+This subset exists specifically to test the project's original hypothesis: that graph traversal should have an edge over plain vector/keyword search on questions requiring multi-hop reasoning. See `src/data/test/multihop_subset.json` for the exact questions and why each was picked (not tracked in git — the whole `data/test/` dir is gitignored, matching `test.jsonl` itself).
+
+| System | P@1 | NDCG@5 | MAP | Exact Match |
+|---|---|---|---|---|
+| System 1 — Baseline | 0.632 | 0.698 | 0.684 | 0.053 (1/19) |
+| System 2 — Advanced | **0.789** | **0.823** | **0.816** | 0.053 (1/19) |
+| System 3 — Agentic | 0.632 | 0.698 | 0.684 | 0.053 (1/19) |
+| System 4 — KG-only | 0.158 | 0.252 | 0.215 | 0.053 (1/19) |
+| System 5 — Hybrid (KG weighted 0.3x) | 0.632 | 0.665 | 0.658 | 0.053 (1/19) |
+| System 3 + KG routing (Epic 5) | 0.632 | 0.665 | 0.658 | 0.053 (1/19) — agent never selected `kg_multihop` (0/19) |
+
+### Findings
+
+1. **The central hypothesis is not supported: KG-based retrieval does not beat plain dense+BM25 (System 1) on this corpus, overall or on the multi-hop questions it was built for.** System 4 alone is roughly 10x worse on retrieval and 5x worse on generation than every other system. Fused into System 5 with careful down-weighting, it closes most — not all — of that gap, but still never exceeds System 1.
+2. **Exact Match is identical (1/19) across all five systems on the multi-hop subset**, even though retrieval quality (P@1) ranges from 0.16 to 0.79 across them. Once the right document is retrieved, every system — including the best retrievers — still fails to reliably chain the two-stage arithmetic/lookup these questions require. **Retrieval is not the bottleneck for the hardest questions in this corpus; the LLM's multi-step reasoning is.**
+3. **Root-caused, not just measured:** a concrete bug — the graph node `"RoPE"` (an unrelated ML term) matching any query containing "Eu**rope**" via naive substring search — explained part of System 4's weakness and was fixed (word-boundary matching), alongside a hub-node fan-out cap. Both measurably helped (NDCG@5 +36% overall, +219% on multi-hop) without closing the full gap to System 1.
+4. **Naive fusion can make things worse than doing nothing:** equal-weight RRF (System 5 with all three signals weighted 1.0) scored *below* System 1 alone on every metric — a noisy third signal isn't free, even added to two good ones.
+5. **The agentic query-rewriter never chose to route to KG**, even when explicitly offered `kg_multihop` with a description naming exactly this subset's question style. Whether that reflects the agent correctly (if implicitly) recognizing KG wouldn't have helped, or simply a menu/framing effect against 8 more familiar-sounding techniques, wasn't isolated — a forced-routing control is the natural follow-up.
+
+**Takeaway:** building System 4/5 and measuring precisely where they do and don't help was the point of this extension — a well-quantified negative result (with root causes identified and partially fixed) is the actual contribution here, not a discouraging footnote.
+
+---
+
 ## Reproducibility
 
 | Mechanism | Detail |
 |-----------|--------|
 | Prompt templates | Versioned in `src/generation/prompts/` |
 | Preprocessing artifacts | Chunk files cached in `src/data/preprocessed/` and reused |
+| KG artifact | `knowledge_graph.json` (77,421 nodes, 73,011 edges) committed directly, same as the chunk files — regenerate via `main_kg.py --rebuild-index` if needed |
 | Index reuse | Qdrant collections reused unless `--force-rebuild` is passed |
 | Deterministic generation | `LLM_TEMPERATURE = 0.0`, `LLM_TOP_P = 0.1` |
 | Timing logs | Preprocessing and experiment runtimes saved to `src/results/` |
